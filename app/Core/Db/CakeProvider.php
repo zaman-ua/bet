@@ -110,6 +110,6 @@ class CakeProvider implements DbProviderInterface
 
     public function lastInsertId(): int
     {
-        return (int)$this->connect()->lastInsertId();
+        return (int)$this->connect()->getDriver()->lastInsertId();
     }
 }
