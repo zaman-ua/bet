@@ -2,6 +2,7 @@
 
 namespace App\Http\User;
 
+use App\Core\Auth;
 use App\Core\Db\Db;
 use App\Core\Http\Response;
 use App\Http\Controller;
@@ -77,6 +78,10 @@ class RegistrationController extends Controller
                     ]);
                 }
             }
+
+            // сразу его и авторизуем
+            // запоминаемся в сессию
+            Auth::loginUser($idUser);
 
             if($this->request->wantsJson()) {
                 return $this->json(['ok' => true]);
