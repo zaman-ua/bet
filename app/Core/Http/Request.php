@@ -49,4 +49,12 @@ final class Request
     {
         return $this->attributes[$key] ?? $default;
     }
+
+    public function wantsJson(): bool
+    {
+        $accept = $this->headers['Accept'] ?? '';
+        $contentType = $this->headers['Content-Type'] ?? '';
+        $xRequestWith = $this->headers['X-Requested-With'] ?? '';
+        return str_contains($accept, 'application/json') || str_contains($contentType, 'application/json') || $xRequestWith === 'XMLHttpRequest';
+    }
 }

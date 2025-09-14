@@ -17,3 +17,14 @@ if (!function_exists('env')) {
         };
     }
 }
+
+function csrf_token(): string {
+    // ему бы неплохо задать время жизни минут 5-10
+    return $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
+}
+
+function assets(string $path): string
+{
+    // пока что заглушка
+    return '/' . ltrim($path, '/');
+}

@@ -30,6 +30,18 @@ final class App
             return;
         }
 
+        // проверка csrf для всех POST запросов
+        if($request->method === 'POST') {
+            if (($request->post['csrf'] ?? '') !== ($_SESSION['csrf'] ?? '')) {
+                $response = $response
+                    ->withHeader('Content-Type', 'text/plain; charset=utf-8')
+                    ->withStatus(419)
+                    ->write('CSRF token mismatch');
+                $this->emit($response);
+                return;
+            }
+        }
+
         [$handler, $vars] = $match;
 
         // переменные с роутера вписываем в реквест

@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 // автозагрузка через composer
+use App\Core\Auth;
+
 require __DIR__ . '/../vendor/autoload.php';
 
 // константа для рутовой директории проекта
@@ -29,6 +31,13 @@ if (is_file($env)) {
         //putenv("$k=$v");
     }
 }
+
+// не хороший тон стартовать сессию в каждом инстансе приложения
+// выносим в абстрактный контроллер для http запросов, а для api сессия не нужна
+
+// возможно позже сделаю лучше
+session_start();
+Auth::resumeFromRememberCookie();
 
 require APP_ROOT . '/app/helpers.php';
 

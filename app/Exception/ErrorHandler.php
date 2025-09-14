@@ -17,8 +17,7 @@ final class ErrorHandler
             'ERROR', $e::class, $e->getMessage(), $e->getFile(), $e->getLine()
         ));
 
-        $isJsonRequest = $this->wantsJson($request);
-        if ($isJsonRequest) {
+        if ($request->wantsJson()) {
             $payload = [
                 'error' => [
                     'status' => 500,
@@ -44,14 +43,6 @@ final class ErrorHandler
     private function getMessage(Throwable $e)
     {
         return $this->debug ? $e->getMessage() . ': ' . $e->getFile() . ' [' . $e->getLine() .']' : $e->getMessage();
-    }
-
-    private function wantsJson(Request $request): bool
-    {
-        $accept = $request->headers['Accept'] ?? '';
-        $contentType = $request->headers['Content-Type'] ?? '';
-        $xRequestWith = $request->headers['X-Requested-With'] ?? '';
-        return str_contains($accept, 'application/json') || str_contains($contentType, 'application/json') || $xRequestWith === 'XMLHttpRequest';
     }
 
 }
