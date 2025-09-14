@@ -4,6 +4,7 @@
     <meta charset="{{ env('APP_CHARSET', 'UTF-8') }}" />
     <title>{% block title %}{{ env('APP_TITLE', 'Bet placing') }}{% endblock %}</title>
 
+    <script src="{{ assets('assets/css/main.css') }}"></script>
     {% block stylesheets %}{% endblock %}
     <link rel="icon" type="image/x-icon" href="{{ assets('favicon.ico') }}" />
 </head>

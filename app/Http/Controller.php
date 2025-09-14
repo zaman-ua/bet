@@ -36,6 +36,8 @@ abstract class Controller extends ApiController
             $twig->addFunction(new TwigFunction('assets', 'assets'));
             $twig->addFunction(new TwigFunction('csrf_token', 'csrf_token'));
             $twig->addFunction(new TwigFunction('var_dump', 'var_dump'));
+            $twig->addFunction(new TwigFunction('isLoggedIn', 'App\Core\Auth::isLoggedIn'));
+            $twig->addFunction(new TwigFunction('getUser', 'App\Core\Auth::getUser'));
 
             $template = $twig->load($template);
 
@@ -59,4 +61,12 @@ abstract class Controller extends ApiController
             ->write($body);
     }
 
+    public function redirect(string $url, int $code = 301) : Response
+    {
+        return $this->response
+            ->withHeader('HTTP/1.1 301 Moved Permanently','')
+            ->withHeader('Location', $url)
+            ->withStatus($code)
+            ->write('');
+    }
 }

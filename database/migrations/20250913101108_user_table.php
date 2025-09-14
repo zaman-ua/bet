@@ -23,7 +23,7 @@ final class UserTable extends AbstractMigration
         $table
             ->addTimestamps()
             ->addColumn('login', 'string', ['limit' => 50, 'null' => false])
-            ->addColumn('password_hash', 'string', ['limit' => 50, 'null' => false])
+            ->addColumn('password_hash', 'string', ['limit' => 255, 'null' => false])
             ->addColumn('name', 'string', ['limit' => 100, 'null' => false])
             ->addColumn('gender', 'enum', ['values' => ['m', 'f', 'o'], 'default' => 'o', 'null' => false])
             ->addColumn('birth_date', 'date', ['null' => false])

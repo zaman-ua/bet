@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Http\User;
+
+use App\Core\Auth;
+use App\Core\Http\Response;
+use App\Http\Controller;
+
+class LoginController extends Controller
+{
+    public function index() : Response
+    {
+        return $this->render('user/login.html.twig');
+    }
+
+    public function login() : Response
+    {
+        // общая валидация
+        $validated = $this->validate($this->request->post['data'], [
+            'login'             => ['required', 'string', 'min:3', 'max:50'],
+            'password'          => ['required', 'string', 'min:8'],
+            'remember_me'       => ['required', 'boolean'],
+        ]);
+
+        // есть ошибки,
+        if(!empty($this->errors)) {
+            return $this->json(['errors' => $this->errors], 422);
+        }
+
+        $isOk = Auth::login($validated['login'], $validated['password'], $validated['remember_me']);
+        if(!$isOk) {
+            return $this->json(['errors' => [
+                'errors' => 'Пользователь не существует или пароль не верен'
+            ]], 422);
+        }
+
+        return $this->json(['ok' => true]);
+    }
+}

@@ -69,6 +69,9 @@ abstract class ApiController
                             $errors[$field] = 'Должно быть целым числом'; break;
                         }
                         $value = (int)$value;
+                    } elseif ($rule === 'boolean') {
+                        $value = !empty($value);
+
                     } elseif (str_starts_with($rule, 'min:')) {
                         $min = (int)substr($rule, 4);
                         if (is_string($value) && mb_strlen($value) < $min) {

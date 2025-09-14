@@ -1,7 +1,7 @@
 {% extends 'index.layout.html.twig' %}
 
 {% block body %}
-    <h1>The Genus {{ name }}</h1>
+    <h1>The Genus {{ getUser().name }} isLoggedIn: {{ isLoggedIn() }} {{ var_dump(getUser()) }}</h1>
     <ul>
         {% for note in notes %}
             <li>{{ note }}</li>
