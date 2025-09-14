@@ -8,29 +8,34 @@ class HomeController extends Controller
 {
     public function __invoke() : Response
     {
-        return $this->render('home/index.html.twig', [
-            'a_variable' => 'a_variable aaa',
-            'navigation' => [
-                ['href' => '/', 'caption' => 'Home'],
-                ['href' => '/about', 'caption' => 'about'],
-            ]
-        ]);
-    }
+        $config = require APP_ROOT . '/config/bets.php';
 
-    public function show() : Response
-    {
-//        // переменная из ссылки по роуту
-//        $var = $this->request->getAttribute('id');
-//
-//        // переменная из квери параметров
-//        $var = $this->request->query['aaa'];
-//
-//        return $this->render('home/index.html.twig', [
-//            'a_variable' => $var,
-//            'navigation' => [
-//                ['href' => '/', 'caption' => 'Home'],
-//                ['href' => '/about', 'caption' => 'about'],
-//            ]
-//        ]);
+
+        $out[] = [
+            'id'   => 1,
+            'win' => 'Команда 1',
+            'loss' => 'Команда 2',
+            'odds' => [
+                'win' => 2.50,
+                'draw' => 3.05,
+                'loss' => 3.15
+            ],
+        ];
+
+        $out[] = [
+            'id'   => 1,
+            'win' => 'Команда 3',
+            'loss' => 'Команда 4',
+            'odds' => [
+                'win' => 1.45,
+                'draw' => 3.45,
+                'loss' => 5.87
+            ],
+        ];
+
+
+        return $this->render('home/index.html.twig', [
+            'matches' => $out,
+        ]);
     }
 }

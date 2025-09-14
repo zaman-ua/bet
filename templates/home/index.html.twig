@@ -1,17 +1,46 @@
 {% extends 'index.layout.html.twig' %}
 
 {% block body %}
-    <h1>The Genus {{ getUser().name }} isLoggedIn: {{ isLoggedIn() }} </h1>
+    <h1>The "{{ getUser().name }}" isLoggedIn: [{{ isLoggedIn() }}] </h1>
 
-    user is admin {{ isAdmin() }}
+    user is admin [{{ isAdmin() }}]
 
-    {{ var_dump(getUser()) }}
 
-    <ul>
-        {% for note in notes %}
-            <li>{{ note }}</li>
+
+    <table class="table" style="border: 1px solid black">
+        <thead>
+        <tr>
+            <th>Матч</th>
+            <th>Победа первой команды</th>
+            <th>ничья</th>
+            <th>Победа второй команды</th>
+            <th>Ставка</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for m in matches %}
+            <tr>
+                <td>{{ m.win }} — {{ m.loss }}</td>
+                <td>{{ m.odds.win }}</td>
+                <td>{{ m.odds.draw }}</td>
+                <td>{{ m.odds.loss }}</td>
+                <td>
+                    <input type="number" min="1" step="1" class="stake" value="10">
+                </td>
+                <td>
+                    <button class="bet" data-id="{{ m.id }}" data-outcome="win">Победа первой команды</button>
+                    <button class="bet" data-id="{{ m.id }}" data-outcome="draw">ничья</button>
+                    <button class="bet" data-id="{{ m.id }}" data-outcome="loss">Победа второй команды</button>
+                </td>
+            </tr>
         {% endfor %}
-    </ul>
+        </tbody>
+    </table>
+
+
+
+
 {% endblock %}
 
 
