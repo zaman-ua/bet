@@ -32,7 +32,7 @@ final class Auth
 
     public static function userExists($id) : ?array
     {
-        $user = Db::getRow("SELECT id, login, name, status FROM `users` WHERE `id` = ? AND status = 'active'; ", [$id]);
+        $user = Db::getRow("SELECT id, login, name, status, is_admin FROM `users` WHERE `id` = ? AND status = 'active'; ", [$id]);
 
         return $user == [] ? null : $user;
     }
@@ -169,5 +169,10 @@ final class Auth
     public static function getUser() : array
     {
         return self::$user ?? [];
+    }
+
+    public static function isAdmin() : bool
+    {
+        return isset(self::$user['is_admin']) && self::$user['is_admin'] == 1;
     }
 }
