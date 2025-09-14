@@ -3,12 +3,21 @@
 namespace App\Http\User;
 
 use App\Core\Auth;
-use App\Core\Db\Db;
+use App\Core\Http\Request;
 use App\Core\Http\Response;
+use App\DTO\UserCreateDTO;
 use App\Http\Controller;
+use App\Repository\UserRepository;
 
 class RegistrationController extends Controller
 {
+    private UserRepository $userRepository;
+
+    public function __construct(Request $request, Response $response) {
+        $this->userRepository = new UserRepository();
+
+        parent::__construct($request, $response);
+    }
     public function index() : Response
     {
         return $this->render('user/registration.html.twig');
@@ -35,7 +44,7 @@ class RegistrationController extends Controller
         }
 
         // проверим на существование логин пользователя
-        $userExist = Db::getOne("SELECT id FROM `users` WHERE `login` = ?", [$validated['login']]);
+        $userExist = $this->userRepository->getUserIdByLogin($validated['login']);
         if(!empty($userExist)) {
             if(!in_array('login', array_keys($this->errors))) {
                 $this->errors['login'] = 'такой login уже существует';
@@ -56,32 +65,29 @@ class RegistrationController extends Controller
 
         try {
             // вставляем пользователя
-            Db::execute("INSERT INTO `users` (`login`, `password_hash`, `name`, `gender`, `birth_date`) VALUES (?, ?, ?, ?, ?)", [
+            $userId = $this->userRepository->createUser(new UserCreateDTO(
                 $validated['login'],
                 $password_hash,
                 $validated['name'],
                 $validated['gender'],
                 $validated['birth_date']
-            ]);
-
-            // ид вставленой строки
-            $idUser = Db::lastInsertId();
+            ));
 
             // вставляем контакты в отдельную табличку
             // без валидации данных это все очень плохо
             if(!empty($this->request->post['contacts'])) {
                 foreach($this->request->post['contacts'] as $contact) {
-                    Db::execute("INSERT INTO `user_contacts` (`user_id`, `type`, `value`) VALUES (?, ?, ?)", [
-                        $idUser,
+                    $this->userRepository->createUserContact(
+                        $userId,
                         $contact['type'],
                         $contact['value'],
-                    ]);
+                    );
                 }
             }
 
             // сразу его и авторизуем
             // запоминаемся в сессию
-            Auth::loginUser($idUser);
+            Auth::loginUser($userId);
 
             if($this->request->wantsJson()) {
                 return $this->json(['ok' => true]);

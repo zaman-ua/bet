@@ -2,13 +2,19 @@
 
 namespace App\Core;
 
-use App\Core\Db\Db;
+use App\Repository\UserRepository;
 
 final class Auth
 {
     private static ?array $user = null;
+    private static ?UserRepository $users = null;
 
     public const REMEMBER_COOKIE = 'remember';
+
+    public static function usersRepositoryInstance() : UserRepository
+    {
+        return self::$users ?? self::$users = new UserRepository();
+    }
 
     public static function isLoggedIn() : bool
     {
@@ -30,9 +36,9 @@ final class Auth
         return false;
     }
 
-    public static function userExists($id) : ?array
+    public static function userExists($userId) : ?array
     {
-        $user = Db::getRow("SELECT id, login, name, status, is_admin FROM `users` WHERE `id` = ? AND status = 'active'; ", [$id]);
+        $user = self::usersRepositoryInstance()->getUserById($userId, true);
 
         return $user == [] ? null : $user;
     }
@@ -145,7 +151,7 @@ final class Auth
     public static function login(string $login, string $password, bool $remember = false) : bool
     {
         // проверяем наличие пользователя в базе
-        $userRow = Db::getRow("SELECT id, password_hash FROM users WHERE login = :login AND status = 'active' ", ['login' => $login]);
+        $userRow = self::usersRepositoryInstance()->getUserIdPwdByLogin($login);
         if(empty($userRow)) {
             return false;
         }

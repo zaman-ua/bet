@@ -9,6 +9,15 @@
     <link rel="icon" type="image/x-icon" href="{{ assets('favicon.ico') }}" />
 </head>
 <body>
+
+<a href="/">Главная</a>
+{% if isLoggedIn() %}
+    <a href="/users/logout">Выход</a>
+{% else %}
+    <a href="/users/login">Авторизация</a>
+    <a href="/users/registration">Регистрация</a>
+{% endif %}
+
 {% block body %}{% endblock %}
 
 <script src="{{ assets('assets/js/jquery.min.js') }}"></script>

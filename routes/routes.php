@@ -11,8 +11,6 @@ return function (Router $route): void {
     $route->add('GET', '/', HomeController::class);
     $route->add('GET', '/{id:\d+}', [HomeController::class, 'show']);
 
-    $route->add('GET', '/posts/{id:\d+}', ApiHomeController::class);
-
 
     $route->add('GET', '/users/registration', [RegistrationController::class, 'index']);
     $route->add('POST', '/users/registration', [RegistrationController::class, 'register']);
