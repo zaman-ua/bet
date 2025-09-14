@@ -12,7 +12,29 @@ final class Auth
 
     public static function isLoggedIn() : bool
     {
-        return isset($_SESSION['uid']);
+        if(!empty($_SESSION['uid'])) {
+            // пользователь авторизован - достанем по нему немного информации, что бы всегда была под рукой
+            // заодно и проверим валидный ли у нас идентификатор в сессии
+
+            // так как функция может дергаться везеде по коду, то исключим повторные запросы в бд
+            if(empty(self::$user)) {
+                self::$user = self::userExists($_SESSION['uid']);
+            }
+
+            // вот и сама проверка валидности пользователя
+            if(!empty(self::$user['id'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static function userExists($id) : ?array
+    {
+        $user = Db::getRow("SELECT id, login, name, status FROM `users` WHERE `id` = ? AND status = 'active'; ", [$id]);
+
+        return $user == [] ? null : $user;
     }
 
     // запомнить в сессию
@@ -64,15 +86,18 @@ final class Auth
 
     public static function resumeFromRememberCookie() : void
     {
-        if (self::isLoggedIn()) {
-            // пользователь авторизован - достанем по нему немного информации, что бы всегда была под рукой
-            self::$user = Db::getRow('SELECT id, login, name, status FROM `users` WHERE `id` = ?', [$_SESSION['uid']]);
+        if (self::isLoggedIn()) return;
+
+        $raw = $_COOKIE[self::REMEMBER_COOKIE] ?? null;
+        if (empty($raw)) {
+
+            // если в сессии ид есть, а в куках и базе нет, то удаляем - потому что это ошибка
+            if(empty(self::$user) && !empty($_SESSION['uid'])) {
+                self::logoutUser();
+            }
 
             return;
         }
-
-        $raw = $_COOKIE[self::REMEMBER_COOKIE] ?? null;
-        if (empty($raw)) return;
 
         $decoded = base64_decode($raw, true);
         if ($decoded === false) {
@@ -104,8 +129,12 @@ final class Auth
             return;
         }
 
-        // опционально: проверить что пользователь ещё существует
-        // if (!userExists((int)$uid)) { clearRememberCookie(); return; }
+        // проверить что пользователь ещё существует
+        if (!self::userExists((int)$uid)) {
+            self::logoutUser();
+            self::clearRememberCookie();
+            return;
+        }
 
         self::loginUser((int)$uid);
         // можно “ротировать” куку, обновив срок:

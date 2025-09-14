@@ -10,6 +10,9 @@ class LoginController extends Controller
 {
     public function index() : Response
     {
+        Auth::logoutUser();
+        Auth::clearRememberCookie();
+
         return $this->render('user/login.html.twig');
     }
 

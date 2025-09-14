@@ -28,10 +28,12 @@ final class UserTable extends AbstractMigration
             ->addColumn('gender', 'enum', ['values' => ['m', 'f', 'o'], 'default' => 'o', 'null' => false])
             ->addColumn('birth_date', 'date', ['null' => false])
             ->addColumn('status', 'enum', ['values' => ['active', 'inactive'], 'default' => 'active', 'null' => false])
+            ->addColumn('is_admin', 'boolean', ['default' => 0, 'null' => false])
 
             ->addIndex(['login'], ['unique' => true])
             ->addIndex(['gender'], ['unique' => false])
             ->addIndex(['status'], ['unique' => false])
+            ->addIndex(['is_admin'], ['unique' => false])
             ->create();
     }
 }
