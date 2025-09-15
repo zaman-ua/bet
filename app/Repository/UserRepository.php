@@ -7,7 +7,7 @@ use App\DTO\UserCreateDTO;
 
 final class UserRepository
 {
-    public function getUserById(int $userId, ?bool $status = null) : array
+    public function getUserById(int $userId, ?bool $status = null) : ?array
     {
         $sql = 'SELECT id, login, name, gender, birth_date, status, is_admin FROM `users` WHERE `id` = :userId ';
         $params['userId'] = $userId;
@@ -20,7 +20,7 @@ final class UserRepository
         return Db::getRow($sql, $params);
     }
 
-    public function getUserIdPwdByLogin(string $login) : array
+    public function getUserIdPwdByLogin(string $login) : ?array
     {
         return Db::getRow("SELECT id, password_hash 
             FROM users 
