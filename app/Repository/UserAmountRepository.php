@@ -23,7 +23,7 @@ final class UserAmountRepository
             ON DUPLICATE KEY UPDATE
               amount = amount + values(amount)
         ', [
-            'amount' => $amount,
+            'amount' => -$amount,
             'userId' => $userId,
             'currencyId' => $currencyId
         ]);

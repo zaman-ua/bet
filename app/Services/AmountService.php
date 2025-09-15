@@ -25,7 +25,8 @@ final class AmountService
             if ($amount > 0) {
                 $this->amounts->credit($userId, $currencyId, $amount);
             } else {
-                $this->amounts->debit($userId, $currencyId, $amount);
+                // минус на минус даст плюс и будет все ок по логике
+                $this->amounts->debit($userId, $currencyId, -$amount);
             }
             $this->userAccountLogs->logAdminAdjust(new UserAmountLogCreateDTO(
                 $userId,

@@ -16,7 +16,7 @@ final class BetRepository
                 $dto->userId,
                 $dto->currencyId,
                 $dto->matchId,
-                $dto->outcome,
+                $dto->outcome->value,
                 $dto->stake,
                 $dto->coefficient
             ]);
@@ -47,6 +47,19 @@ final class BetRepository
 
     public function fetchAll() : ?array
     {
-        return Db::getAll('SELECT * FROM bets');
+        return Db::getAll('SELECT 
+                b.created_at,
+                u.name,
+                c.code,
+                b.match_id,
+                b.outcome,
+                b.stake,
+                b.coefficient,
+                b.status,
+                b.payout
+            FROM bets as b
+            INNER JOIN users as u ON b.user_id = u.id
+            INNER JOIN currencies as c ON b.currency_id = c.id
+        ');
     }
 }
