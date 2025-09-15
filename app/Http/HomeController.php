@@ -2,14 +2,18 @@
 
 namespace App\Http;
 
+use App\Core\Auth;
 use App\Core\Http\Response;
+use App\Repository\BetRepository;
 
-class HomeController extends Controller
+final class HomeController extends Controller
 {
     public function __invoke() : Response
     {
-        $config = require APP_ROOT . '/config/bets.php';
-
+        // такого не должно быть, но в жизни всякое бывает
+        if(Auth::isAdmin()) {
+            return $this->redirect('/admin/bets');
+        }
 
         $out[] = [
             'id'   => 1,
@@ -23,7 +27,7 @@ class HomeController extends Controller
         ];
 
         $out[] = [
-            'id'   => 1,
+            'id'   => 2,
             'win' => 'Команда 3',
             'loss' => 'Команда 4',
             'odds' => [

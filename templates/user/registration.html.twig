@@ -2,77 +2,74 @@
 
 {% block title %}Registration title{% endblock %}
 
-{% block stylesheets %}
-    <style>
-
-    </style>
-{% endblock %}
 
 {% block body %}
-    <h1>Create new account</h1>
+    <section class="content">
+        <h1>Create new account</h1>
 
-{#    {{ var_dump(errors) }} #}
+    {#    {{ var_dump(errors) }} #}
 
-    {% if errors.error %}
-    <div class="form-error">
-        {{ errors.error }}
-    </div>
-    {% endif %}
-
-    <form method="POST" action="/users/registration" class="form">
-        <input class="input" type="hidden" name="csrf" value="{{ csrf_token() }}" />
-
-        <input class="input" type="text" name="data[login]" id="data-login" placeholder="login" value="{{ old.data.login }}"/>
-        {% if errors.login %} {{ errors.login }} {% endif %}
-
-        <input class="input" type="password" name="data[password]" id="data-password" placeholder="password" value="{{ old.data.password }}"/>
-        {% if errors.password %} {{ errors.password }} {% endif %}
-
-        <input class="input" type="password" name="data[retype_password]" id="data-retype_password" placeholder="retype password" value="{{ old.data.retype_password }}"/>
-        {% if errors.retype_password %} {{ errors.retype_password }} {% endif %}
-
-        <input class="input" type="text" name="data[name]" id="data-name" placeholder="name" value="{{ old.data.name }}" />
-        {% if errors.name %} {{ errors.name }} {% endif %}
-
-        <select name="data[gender]" id="data-gender" >
-            <option value="o" {%if old.data.gender == 'o' %}selected{% endif %}>other</option>
-            <option value="m" {%if old.data.gender == 'm' %}selected{% endif %}>male</option>
-            <option value="f" {%if old.data.gender == 'f' %}selected{% endif %}>female</option>
-        </select>
-        {% if errors.gender %} {{ errors.gender }} {% endif %}
-
-        <input class="input" type="date" name="data[birth_date]" id="data-birth-date" placeholder="birth date" value="{{ old.data.birth_date }}"/>
-        {% if errors.birth_date %} {{ errors.birth_date }} {% endif %}
-
-        <div id="contacts-list">
-            <div class="contact-row" data-index="0">
-                <select name="contacts[0][type]" id="contacts-0-type" >
-                    <option value="phone" {%if old.contacts.0.type == 'phone' %}selected{% endif %}>phone</option>
-                    <option value="email" {%if old.contacts.0.type == 'email' %}selected{% endif %}>email</option>
-                    <option value="address" {%if old.contacts.0.type == 'address' %}selected{% endif %}>address</option>
-                </select>
-                <input class="input" type="text" name="contacts[0][value]" id="contacts-0-value" placeholder="value" value="{{ old.contacts.0.value }}" />
-                <button type="button" class="btn-remove" aria-label="Remove">−</button>
-            </div>
+        {% if errors.error %}
+        <div class="form-error">
+            {{ errors.error }}
         </div>
+        {% endif %}
 
-        <button type="button" id="add-contact" class="btn">+ add contact</button>
+        <form method="POST" action="/users/registration" class="form">
+            <input class="input" type="hidden" name="csrf" value="{{ csrf_token() }}" />
 
-        <template id="contact-template">
-            <div class="contact-row" data-index="__INDEX__">
-                <select name="contacts[__INDEX__][type]" id="contacts-__INDEX__-type">
-                    <option value="phone">phone</option>
-                    <option value="email">email</option>
-                    <option value="address">address</option>
-                </select>
-                <input class="input" type="text" name="contacts[__INDEX__][value]" id="contacts-__INDEX__-value" placeholder="value" />
-                <button type="button" class="btn-remove" aria-label="Remove">−</button>
+            <input class="input" type="text" name="data[login]" id="data-login" placeholder="login" value="{{ old.data.login }}"/>
+            {% if errors.login %} {{ errors.login }} {% endif %}
+
+            <input class="input" type="password" name="data[password]" id="data-password" placeholder="password" value="{{ old.data.password }}"/>
+            {% if errors.password %} {{ errors.password }} {% endif %}
+
+            <input class="input" type="password" name="data[retype_password]" id="data-retype_password" placeholder="retype password" value="{{ old.data.retype_password }}"/>
+            {% if errors.retype_password %} {{ errors.retype_password }} {% endif %}
+
+            <input class="input" type="text" name="data[name]" id="data-name" placeholder="name" value="{{ old.data.name }}" />
+            {% if errors.name %} {{ errors.name }} {% endif %}
+
+            <select name="data[gender]" id="data-gender" >
+                <option value="o" {%if old.data.gender == 'o' %}selected{% endif %}>other</option>
+                <option value="m" {%if old.data.gender == 'm' %}selected{% endif %}>male</option>
+                <option value="f" {%if old.data.gender == 'f' %}selected{% endif %}>female</option>
+            </select>
+            {% if errors.gender %} {{ errors.gender }} {% endif %}
+
+            <input class="input" type="date" name="data[birth_date]" id="data-birth-date" placeholder="birth date" value="{{ old.data.birth_date }}"/>
+            {% if errors.birth_date %} {{ errors.birth_date }} {% endif %}
+
+            <div id="contacts-list">
+                <div class="contact-row" data-index="0">
+                    <select name="contacts[0][type]" id="contacts-0-type" >
+                        <option value="phone" {%if old.contacts.0.type == 'phone' %}selected{% endif %}>phone</option>
+                        <option value="email" {%if old.contacts.0.type == 'email' %}selected{% endif %}>email</option>
+                        <option value="address" {%if old.contacts.0.type == 'address' %}selected{% endif %}>address</option>
+                    </select>
+                    <input class="input" type="text" name="contacts[0][value]" id="contacts-0-value" placeholder="value" value="{{ old.contacts.0.value }}" />
+                    <button type="button" class="btn-remove" aria-label="Remove">−</button>
+                </div>
             </div>
-        </template>
+
+            <button type="button" id="add-contact" class="btn">+ add contact</button>
+
+            <template id="contact-template">
+                <div class="contact-row" data-index="__INDEX__">
+                    <select name="contacts[__INDEX__][type]" id="contacts-__INDEX__-type">
+                        <option value="phone">phone</option>
+                        <option value="email">email</option>
+                        <option value="address">address</option>
+                    </select>
+                    <input class="input" type="text" name="contacts[__INDEX__][value]" id="contacts-__INDEX__-value" placeholder="value" />
+                    <button type="button" class="btn-remove" aria-label="Remove">−</button>
+                </div>
+            </template>
 
 
-        <input class="btn" type="submit" value="Create new account" />
-    </form>
+            <input class="btn" type="submit" value="Create new account" />
+        </form>
+    </section>
 
 {% endblock %}
 

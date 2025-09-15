@@ -8,7 +8,7 @@ final class UserAmountLogCreateDTO
         public int $userId,
         public int $currencyId,
         public int $amount,
-        public int $betId = 0,
+        public ?int $betId = null,
         public string $comment = ''
     ) {}
 }

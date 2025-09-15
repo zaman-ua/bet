@@ -71,7 +71,13 @@ class PdoProvider implements DbProviderInterface
             foreach ($rows as $row) {
                 // первый элемент делаем ключем
                 $key = array_shift($row);
-                $out[$key] = $row;
+
+                //особый случай для 2х колонок
+                if(count($row ?? []) == 1) {
+                    $out[$key] = array_shift($row);
+                } else {
+                    $out[$key] = $row;
+                }
             }
         }
 

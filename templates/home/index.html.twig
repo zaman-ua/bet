@@ -1,53 +1,101 @@
 {% extends 'index.layout.html.twig' %}
 
 {% block body %}
-    <h1>The "{{ getUser().name }}" isLoggedIn: [{{ isLoggedIn() }}] </h1>
+    <section class="content">
 
-    user is admin [{{ isAdmin() }}]
+        <h1>Делайте ставки!</h1>
 
-
-
-    <table class="table" style="border: 1px solid black">
-        <thead>
-        <tr>
-            <th>Матч</th>
-            <th>Победа первой команды</th>
-            <th>ничья</th>
-            <th>Победа второй команды</th>
-            <th>Ставка</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for m in matches %}
+        {%if isLoggedIn() %}
+        <table class="table-responsive">
+            <thead>
             <tr>
-                <td>{{ m.win }} — {{ m.loss }}</td>
-                <td>{{ m.odds.win }}</td>
-                <td>{{ m.odds.draw }}</td>
-                <td>{{ m.odds.loss }}</td>
-                <td>
-                    <input type="number" min="1" step="1" class="stake" value="10">
-                </td>
-                <td>
-                    <button class="bet" data-id="{{ m.id }}" data-outcome="win">Победа первой команды</button>
-                    <button class="bet" data-id="{{ m.id }}" data-outcome="draw">ничья</button>
-                    <button class="bet" data-id="{{ m.id }}" data-outcome="loss">Победа второй команды</button>
-                </td>
+                <th>Матч</th>
+                <th>Победа первой команды</th>
+                <th>ничья</th>
+                <th>Победа второй команды</th>
+                <th>Ставка</th>
+                <th></th>
             </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            {% for m in matches %}
+                <tr>
+                    <td>{{ m.win }} — {{ m.loss }}</td>
+                    <td>{{ m.odds.win }}</td>
+                    <td>{{ m.odds.draw }}</td>
+                    <td>{{ m.odds.loss }}</td>
+                    <td>
+                        <input type="number" min="1" max="500" step="1" class="stake" value="10">
+                    </td>
+                    <td>
+                        <button class="bet" data-id="{{ m.id }}" data-outcome="win" data-coefficient="{{ m.odds.win }}">Победа первой команды</button>
+                        <button class="bet" data-id="{{ m.id }}" data-outcome="draw" data-coefficient="{{ m.odds.draw }}">ничья</button>
+                        <button class="bet" data-id="{{ m.id }}" data-outcome="loss" data-coefficient="{{ m.odds.loss }}">Победа второй команды</button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
 
-
-
-
+    </section>
 {% endblock %}
 
 
 {% block javascripts %}
 <script>
-    $(function() {
-        console.log('jQuery ready!');
+    $(document).on('click', '.bet', function (e) {
+        e.preventDefault();
+
+        const $btn = $(this);
+        const $row = $btn.closest('tr');              // ищем всю строку
+        const $input = $row.find('input.stake').first(); // инпут в этой строке
+
+        var data = {
+            currency_id: 1,
+            match_id: $btn.data('id'),
+            outcome: $btn.data('outcome'),
+            coefficient: $btn.data('coefficient'),
+            stake: $input.val(),
+            csrf: '{{ csrf_token() }}'
+        };
+
+        $.ajax({
+            url: '/users/bet',
+            method: 'POST',
+            data: data,
+            dataType: 'json',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            success: function (resp, status, xhr) {
+                if (resp?.ok) {
+                    // успех — редирект или сообщение
+                    window.location = resp.redirect || '/';
+                    return;
+                }
+                if (resp?.error) {
+                    renderErrors($form, resp.error);
+                    return;
+                }
+                // если сервер вернул HTML вместо JSON — заменим форму (fallback)
+                if (xhr.getResponseHeader('Content-Type')?.includes('text/html')) {
+                    $form.replaceWith(resp);
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 422 || xhr.status === 409 || xhr.status === 400) {
+                    const json = xhr.responseJSON || {};
+                    alert(json.error);
+                } else {
+                    alert('Ошибка сервера. Попробуйте позже.');
+                }
+            },
+            // complete: function () {
+            //     $btn.prop('disabled', false);
+            // }
+        });
     });
 </script>
 {% endblock %}

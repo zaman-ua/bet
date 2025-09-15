@@ -55,8 +55,8 @@ abstract class Controller extends ApiController
         // фишка php8 Constructor Property Promotion
         return $this->response
             ->withHeader('Content-Type', 'text/html; charset=utf-8')
-            ->withHeader('X-Content-Type-Options', 'nosniff')
-            ->withHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+//            ->withHeader('X-Content-Type-Options', 'nosniff')
+//            ->withHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
 //            ->withHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'")
             ->withStatus($code)
             ->write($body);

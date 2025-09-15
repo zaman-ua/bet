@@ -177,6 +177,11 @@ final class Auth
         return self::$user ?? [];
     }
 
+    public static function getUserId() : ?int
+    {
+        return self::$user !== null ? self::$user['id'] : null;
+    }
+
     public static function isAdmin() : bool
     {
         return isset(self::$user['is_admin']) && self::$user['is_admin'] == 1;

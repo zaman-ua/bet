@@ -23,7 +23,7 @@ final class UserRepository
     public function getUserIdPwdByLogin(string $login) : ?array
     {
         return Db::getRow("SELECT id, password_hash 
-            FROM users 
+            FROM `users` 
             WHERE login = :login AND status = 'active' ", [
                 'login' => $login
         ]);
@@ -57,5 +57,53 @@ final class UserRepository
         ]);
 
         return Db::lastInsertId();
+    }
+
+    public function fetchAll() : ?array
+    {
+        return Db::getAll("SELECT
+                u.id, u.created_at, u.login, u.name, u.gender, u.birth_date, u.status, u.is_admin,
+                p.phones, e.emails, a.addresses, am.amounts
+            FROM users u
+            LEFT JOIN (
+                SELECT user_id, GROUP_CONCAT(value ORDER BY id SEPARATOR '; ') AS phones
+                FROM user_contacts
+                WHERE type = 'phone'
+                GROUP BY user_id
+            ) p ON p.user_id = u.id
+            LEFT JOIN (
+                SELECT user_id, GROUP_CONCAT(value ORDER BY id SEPARATOR '; ') AS emails
+                FROM user_contacts
+                WHERE type = 'email'
+                GROUP BY user_id
+            ) e ON e.user_id = u.id
+            LEFT JOIN (
+                SELECT user_id, GROUP_CONCAT(value ORDER BY id SEPARATOR '; ') AS addresses
+                FROM user_contacts
+                WHERE type = 'address'
+                GROUP BY user_id
+            ) a ON a.user_id = u.id
+            LEFT JOIN (
+                SELECT ua.user_id,
+                GROUP_CONCAT(DISTINCT CONCAT(ua.amount, ' ', c.symbol) ORDER BY c.symbol SEPARATOR '; ') AS amounts
+                FROM user_amounts ua
+                JOIN currencies c ON c.id = ua.currency_id
+                GROUP BY ua.user_id
+            ) am ON am.user_id = u.id;
+        ");
+    }
+
+    public function fetchAmountsById(int $userId) : ?string
+    {
+        return Db::getOne("SELECT am.amounts
+            FROM users u
+            LEFT JOIN (
+                SELECT ua.user_id,
+                GROUP_CONCAT(DISTINCT CONCAT(ua.amount, ' ', c.symbol) ORDER BY c.symbol SEPARATOR '; ') AS amounts
+                FROM user_amounts ua
+                JOIN currencies c ON c.id = ua.currency_id
+                GROUP BY ua.user_id
+            ) am ON am.user_id = u.id
+            WHERE u.id = :userId", [$userId]);
     }
 }

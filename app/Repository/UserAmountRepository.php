@@ -18,20 +18,24 @@ final class UserAmountRepository
 
     public function debit(int $userId, int $currencyId, int $amount): void
     {
-        Db::execute('UPDATE user_amounts
-             SET amount = amount - :amount
-             WHERE user_id = :userId AND currency_id = :currencyId', [
-                'amount' => $amount,
-                'userId' => $userId,
-                'currencyId' => $currencyId
+        Db::execute('INSERT INTO user_amounts (user_id, currency_id, amount)
+            VALUES (:userId, :currencyId, :amount)
+            ON DUPLICATE KEY UPDATE
+              amount = amount + values(amount)
+        ', [
+            'amount' => $amount,
+            'userId' => $userId,
+            'currencyId' => $currencyId
         ]);
     }
 
     public function credit(int $userId, int $currencyId, int $amount): void
     {
-        Db::execute('UPDATE user_amounts
-             SET amount = amount + :amount
-             WHERE user_id = :userId AND currency_id = :currencyId', [
+        Db::execute('INSERT INTO user_amounts (user_id, currency_id, amount)
+            VALUES (:userId, :currencyId, :amount)
+            ON DUPLICATE KEY UPDATE
+              amount = amount + values(amount)
+             ', [
                 'amount' => $amount,
                 'userId' => $userId,
                 'currencyId' => $currencyId

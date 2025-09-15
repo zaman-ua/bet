@@ -4,25 +4,26 @@
 
 
 {% block body %}
-    <h1>Login</h1>
+    <section class="content">
+        <h1>Login</h1>
 
-    <form method="POST" action="/users/login" class="form">
-        <input class="input" type="hidden" name="csrf" value="{{ csrf_token() }}" />
+        <form method="POST" action="/users/login" class="form">
+            <input class="input" type="hidden" name="csrf" value="{{ csrf_token() }}" />
 
-        <input class="input" type="text" name="data[login]" id="data-login" placeholder="login" value="{{ old.data.login }}"/>
-        {% if errors.login %} {{ errors.login }} {% endif %}
+            <input class="input" type="text" name="data[login]" id="data-login" placeholder="login" value="{{ old.data.login }}"/>
+            {% if errors.login %} {{ errors.login }} {% endif %}
 
-        <input class="input" type="password" name="data[password]" id="data-password" placeholder="password" value="{{ old.data.password }}"/>
-        {% if errors.password %} {{ errors.password }} {% endif %}
+            <input class="input" type="password" name="data[password]" id="data-password" placeholder="password" value="{{ old.data.password }}"/>
+            {% if errors.password %} {{ errors.password }} {% endif %}
 
-        <input type="hidden" name="data[remember_me]" value="0">
-        <input class="input" type="checkbox" name="data[remember_me]"
-             id="data-remember-me" value="1" {% if old.data.remember_me %}checked{% endif %} />
-        <label for="data-remember-me">remember_me</label>
+            <input type="hidden" name="data[remember_me]" value="0">
+            <input class="input" type="checkbox" name="data[remember_me]"
+                 id="data-remember-me" value="1" {% if old.data.remember_me %}checked{% endif %} />
+            <label for="data-remember-me">remember_me</label>
 
-        <input class="btn" type="submit" value="Login" />
-    </form>
-
+            <input class="btn" type="submit" value="Login" />
+        </form>
+    </section>
 {% endblock %}
 
 

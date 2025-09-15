@@ -38,11 +38,15 @@ final class BetRepository
     {
         Db::execute("UPDATE bets SET 
             status='won', 
-            payout=:payout, 
-            updated_at=NOW()
+            payout=:payout
         WHERE id = :id", [
             'payout' => $payout,
             'id' => $betId
         ]);
+    }
+
+    public function fetchAll() : ?array
+    {
+        return Db::getAll('SELECT * FROM bets');
     }
 }

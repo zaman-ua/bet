@@ -48,5 +48,5 @@ function csrf_token(): string {
 function assets(string $path): string
 {
     // пока что заглушка
-    return '/' . ltrim($path, '/');
+    return '/assets/' . ltrim($path, '/');
 }

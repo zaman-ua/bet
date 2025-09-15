@@ -2,25 +2,57 @@
 <html>
 <head>
     <meta charset="{{ env('APP_CHARSET', 'UTF-8') }}" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
     <title>{% block title %}{{ env('APP_TITLE', 'Bet placing') }}{% endblock %}</title>
 
-    <script src="{{ assets('assets/css/main.css') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ assets('css/main.css') }}">
     {% block stylesheets %}{% endblock %}
     <link rel="icon" type="image/x-icon" href="{{ assets('favicon.ico') }}" />
 </head>
 <body>
 
-<a href="/">Главная</a>
-{% if isLoggedIn() %}
-    <a href="/users/logout">Выход</a>
-{% else %}
-    <a href="/users/login">Авторизация</a>
-    <a href="/users/registration">Регистрация</a>
-{% endif %}
+<!-- Navigation bar -->
+<header class="header">
+    <!-- Logo -->
 
+    {% if isAdmin() %}
+        <a href="/admin/bets" class="logo">Ставки</a>
+    {% else %}
+        <a href="/" class="logo">Главная</a>
+    {% endif %}
+
+    <span class="user-name">{{ getUser().name ?? 'гость' }}</span>
+
+    <!-- Hamburger icon -->
+    <input class="side-menu" type="checkbox" id="side-menu"/>
+    <label class="hamb" for="side-menu"><span class="hamb-line"></span></label>
+    <!-- Menu -->
+    <nav class="nav">
+        <ul class="menu">
+            {% if isAdmin() %}
+                <li><a href="/admin/users">Пользователи</a></li>
+            {% endif %}
+
+            {% if isLoggedIn() %}
+                <li><a href="/users/logout">Выход</a></li>
+            {% else %}
+                <li><a href="/users/login">Авторизация</a></li>
+                <li><a href="/users/registration">Регистрация</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</header>
+
+<!-- Main content -->
+<main>
 {% block body %}{% endblock %}
+</main>
 
-<script src="{{ assets('assets/js/jquery.min.js') }}"></script>
+
+<script src="{{ assets('js/jquery.min.js') }}"></script>
+
 {% block javascripts %}{% endblock %}
 </body>
 </html>

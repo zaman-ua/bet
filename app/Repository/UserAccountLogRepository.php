@@ -17,7 +17,7 @@ final class UserAccountLogRepository
              VALUES (?, ?, ?, ?, ?, ?)', [
                  $dto->userId,
                  $dto->currencyId,
-                 $dto->betId ?? 0,
+                 $dto->betId,
                  'bet_place',
                  - $dto->amount,
                  $dto->comment ?? 'bet_place'
@@ -30,7 +30,7 @@ final class UserAccountLogRepository
              VALUES (?, ?, ?, ?, ?, ?)', [
             $dto->userId,
             $dto->currencyId,
-            $dto->betId ?? 0,
+            $dto->betId,
             'bet_win',
             $dto->amount,
             $dto->comment ?? 'bet_win'
@@ -43,9 +43,9 @@ final class UserAccountLogRepository
              VALUES (?, ?, ?, ?, ?, ?)', [
             $dto->userId,
             $dto->currencyId,
-            $dto->betId ?? 0,
+            $dto->betId,
             'admin_adjust',
-            - $dto->amount,
+            $dto->amount,
             $dto->comment ?? 'admin_adjust'
         ]);
     }

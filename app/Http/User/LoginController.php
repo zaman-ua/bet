@@ -37,6 +37,14 @@ class LoginController extends Controller
             ]], 422);
         }
 
+        // тут бы правильный редирект для админа сделать
+        if(Auth::isAdmin()) {
+            return $this->json([
+                'ok' => true,
+                'redirect' => '/admin/bets'
+            ]);
+        }
+
         return $this->json(['ok' => true]);
     }
 }
