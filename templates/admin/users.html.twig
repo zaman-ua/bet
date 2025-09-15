@@ -1,0 +1,178 @@
+{% extends 'index.layout.html.twig' %}
+
+{% block body %}
+    <section class="content">
+        <h1>Пользователи</h1>
+
+        <table class="table-responsive">
+            <thead>
+            <tr>
+                <th>login</th>
+                <th>created_at</th>
+                <th>name</th>
+                <th>amounts</th>
+                <th>gender</th>
+                <th>birth_date</th>
+                <th>status</th>
+                <th>is_admin</th>
+                <th>phones</th>
+                <th>emails</th>
+                <th>addresses</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.login }}</td>
+                    <td>{{ user.created_at }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>
+                        <span id="user-amounts-{{ user.id }}">
+                            {{ user.amounts ?? '---'}}
+                        </span>
+
+                        <div class="hidden adjust-block" id="adjust-{{ user.id }}">
+                            <form class="form js-form-adjust" method="POST" action="/admin/users/{{ user.id }}/adjust">
+                                <input type="hidden" name="csrf" value="{{ csrf_token() }}" />
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+
+                                {% for currency in currencies %}
+                                {{ currency }}: <input type="number" name="currency[{{ loop.index }}]" value="0"> <br>
+                                {% endfor %}
+
+                                <button type="submit" class="btn btn-primary">Сохранить</button>
+                            </form>
+
+                        </div>
+
+                        <a class="user-adjust-edit-button" data-id="{{ user.id }}">
+                            <img src="{{ assets('images/edit.png') }}" alt="adjust">
+                        </a>
+                    </td>
+                    <td>{{ user.gender }}</td>
+                    <td>{{ user.birth_date }}</td>
+                    <td>{{ user.status }}</td>
+                    <td>{{ user.is_admin }}</td>
+                    <td>{{ user.phones }}</td>
+                    <td>{{ user.emails }}</td>
+                    <td>{{ user.addresses }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+{% endblock %}
+
+
+{% block javascripts %}
+<script>
+    $(function () {
+
+        $('.table-responsive table').each(function () {
+            const $t = $(this);
+            const headers = [];
+            $t.find('thead th').each(function (i) {
+                headers[i] = $(this).text().trim();
+            });
+            $t.find('tbody tr').each(function () {
+                $(this).children('td').each(function (i) {
+                    // не перезаписываем, если уже задано вручную
+                    if (!this.hasAttribute('data-th')) {
+                        this.setAttribute('data-th', headers[i] ?? '');
+                    }
+                });
+            });
+        });
+
+        $(document).on('click', '.user-adjust-edit-button', function (e) {
+            const $a = $(this);
+            var id = $a.data('id');
+
+            $('#adjust-'+id).toggle();
+            $('.user-adjust-edit-button[data-id='+id+']').hide();
+        });
+
+
+        $(document).on('submit', '.js-form-adjust', function (e) {
+            e.preventDefault();
+
+            const $form = $(this);
+            const action = $form.attr('action') || window.location.pathname;
+            const method = ($form.attr('method') || 'POST').toUpperCase();
+
+            const userId = $form.find('[name="user_id"]').val();
+
+            // очистим предыдущие ошибки
+            // $form.find('.field-error').remove();
+            // $form.find('.is-invalid').removeClass('is-invalid');
+
+            $('#adjust-'+userId).hide();
+
+            $.ajax({
+                url: action,
+                method: method,
+                data: $form.serialize(),              // работает с data[login] и пр.
+                dataType: 'json',                     // ждём JSON
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                success: function (resp, status, xhr) {
+                    if (resp?.ok) {
+
+                        // перерисуем кусочек с балансами
+                        $('#user-amounts-'+userId).html(resp?.amountsHtml);
+
+                        $('.user-adjust-edit-button[data-id='+userId+']').show();
+
+                        // сбрасываем форму
+                        $(form).find('input, textarea').each(function () {
+                            this.setAttribute('value', 0);
+                        });
+
+                        return;
+                    }
+                    if (resp?.errors) {
+                        renderErrors($form, resp.errors);
+                        return;
+                    }
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422) {
+                        // валидация: { errors: { field: "message", ... } }
+                        const json = xhr.responseJSON || {};
+                        renderErrors($form, json.errors || {});
+                    } else {
+                        alert('Ошибка сервера. Попробуйте позже.');
+                    }
+                },
+                complete: function () {
+                    // $btn.prop('disabled', false);
+                }
+            });
+        });
+
+        function renderErrors($form, errors) {
+            // errors: { login: '...', password: '...', ... }
+            for (const [field, message] of Object.entries(errors)) {
+                // для полей вида data[login] → найдём по name
+                const selector = `[name="data[${field}]"]`;
+                const $input = $form.find(selector);
+                if ($input.length) {
+                    $input.addClass('is-invalid')
+                        .after(`<div class="field-error" style="color:#c00;font-size:12px;margin-top:4px;">${escapeHtml(message)}</div>`);
+                } else {
+                    // общий блок вверху, если поле не найдено
+                    $form.prepend(`<div class="field-error" style="color:#c00;margin-bottom:8px;">${escapeHtml(message)}</div>`);
+                }
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '').replace(/[&<>"']/g, s => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+            })[s]);
+        }
+    });
+</script>
+{% endblock %}
