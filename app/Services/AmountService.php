@@ -29,9 +29,9 @@ final class AmountService
                 $this->amounts->debit($userId, $currencyId, -$amount);
             }
             $this->userAccountLogs->logAdminAdjust(new UserAmountLogCreateDTO(
-                $userId,
-                $currencyId,
-                $amount,
+                userId: $userId,
+                currencyId: $currencyId,
+                amount: $amount,
                 comment: $comment
             ));
 

@@ -4,6 +4,7 @@ namespace App\Http\Admin;
 
 use App\Core\Auth;
 use App\Core\Http\Response;
+use App\Domain\Money;
 use App\Http\Controller;
 use App\Repository\CurrencyRepository;
 use App\Repository\UserRepository;
@@ -44,11 +45,12 @@ final class UsersController extends Controller
                 // валидируем наличие пользователя, валюты, сумму
                 // TODO
 
+                $money = Money::fromHuman($amount, $currencyId);
 
                 (new AmountService())->adjust(
                     $data['user_id'],
                     $currencyId,
-                    $amount,
+                    $money->amount,
                     'изменено администратором'
                 );
             }

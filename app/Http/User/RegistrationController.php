@@ -66,11 +66,11 @@ class RegistrationController extends Controller
         try {
             // вставляем пользователя
             $userId = $this->userRepository->createUser(new UserCreateDTO(
-                $validated['login'],
-                $password_hash,
-                $validated['name'],
-                $validated['gender'],
-                $validated['birth_date']
+                login: $validated['login'],
+                password_hash: $password_hash,
+                name: $validated['name'],
+                gender: $validated['gender'],
+                birth_date: $validated['birth_date']
             ));
 
             // вставляем контакты в отдельную табличку

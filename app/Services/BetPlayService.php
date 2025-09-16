@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Core\Db\Db;
-use App\DTO\BetCreateDTO;
 use App\DTO\UserAmountLogCreateDTO;
 use App\Repository\BetRepository;
 use App\Repository\UserAccountLogRepository;

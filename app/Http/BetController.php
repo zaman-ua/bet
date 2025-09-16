@@ -36,13 +36,13 @@ final class BetController extends Controller
             $outcomeEnumVal = OutcomeEnum::from($outcome); // получится ли такой фокус? если да то полезная штука
 
             $betId = (new BettingService())->place(new BetCreateDTO(
-                $userId,
-                $currencyId,
-                $matchId,
-                $outcomeEnumVal,
-                $coefficient,
-                $stake)
-            );
+                userId: $userId,
+                currencyId: $currencyId,
+                matchId: $matchId,
+                outcome: $outcomeEnumVal,
+                stake: $stake,
+                coefficient: $coefficient
+            ));
 
             return $this->json([
                 'bet_id' => $betId,
