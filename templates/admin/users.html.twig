@@ -28,7 +28,11 @@
                     <td>{{ user.name }}</td>
                     <td>
                         <span id="user-amounts-{{ user.id }}">
-                            {{ user.amounts ?? '---'}}
+                            {% if user.amounts %}
+                                {% include 'admin/user_amounts.html.twig' with { amounts_array: user.amounts_array } %}
+                            {% else %}
+                                ---
+                            {% endif %}
                         </span>
 
                         <div class="hidden adjust-block" id="adjust-{{ user.id }}">

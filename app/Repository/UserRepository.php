@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Core\Db\Db;
+use App\Domain\Money;
 use App\DTO\UserCreateDTO;
 
 final class UserRepository
@@ -61,7 +62,7 @@ final class UserRepository
 
     public function fetchAll() : ?array
     {
-        return Db::getAll("SELECT
+        $all = Db::getAll("SELECT
                 u.id, u.created_at, u.login, u.name, u.gender, u.birth_date, u.status, u.is_admin,
                 p.phones, e.emails, a.addresses, am.amounts
             FROM users u
@@ -85,25 +86,59 @@ final class UserRepository
             ) a ON a.user_id = u.id
             LEFT JOIN (
                 SELECT ua.user_id,
-                GROUP_CONCAT(DISTINCT CONCAT(ua.amount, ' ', c.symbol) ORDER BY c.symbol SEPARATOR '; ') AS amounts
+                GROUP_CONCAT(DISTINCT CONCAT(ua.amount, ' ', c.symbol) ORDER BY c.symbol SEPARATOR ';') AS amounts
                 FROM user_amounts ua
                 JOIN currencies c ON c.id = ua.currency_id
                 GROUP BY ua.user_id
             ) am ON am.user_id = u.id;
         ");
+
+        if(!empty($all)) {
+            foreach ($all as $key => $user) {
+                if(!empty($user['amounts'])) {
+                    $amountsArray = explode(';', $user['amounts']);
+                    $all[$key]['amounts_array'] = $this->processAmounts($amountsArray);
+                }
+            }
+        }
+
+        return $all;
     }
 
-    public function fetchAmountsById(int $userId) : ?string
+    public function fetchAmountsById(int $userId) : array
     {
-        return Db::getOne("SELECT am.amounts
+        $amountString = Db::getOne("SELECT am.amounts
             FROM users u
             LEFT JOIN (
                 SELECT ua.user_id,
-                GROUP_CONCAT(DISTINCT CONCAT(ua.amount, ' ', c.symbol) ORDER BY c.symbol SEPARATOR '; ') AS amounts
+                GROUP_CONCAT(DISTINCT CONCAT(ua.amount, ' ', c.symbol) ORDER BY c.symbol SEPARATOR ';') AS amounts
                 FROM user_amounts ua
                 JOIN currencies c ON c.id = ua.currency_id
                 GROUP BY ua.user_id
             ) am ON am.user_id = u.id
             WHERE u.id = :userId", [$userId]);
+
+        if(!empty($amountString)) {
+            $amountsArray = explode(';', $amountString);
+            return $this->processAmounts($amountsArray);
+        }
+
+        return [];
+    }
+
+    private function processAmounts(array $amounts) : array
+    {
+        $result = [];
+
+        if(!empty($amounts)) {
+            foreach ($amounts as $amount) {
+                [$amountRaw, $currencyCode] = explode(' ', $amount);
+                $money = Money::fromRaw($amountRaw, null, $currencyCode);
+
+                $result[] = $money;
+            }
+        }
+
+        return $result;
     }
 }

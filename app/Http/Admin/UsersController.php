@@ -54,9 +54,13 @@ final class UsersController extends Controller
                     'изменено администратором'
                 );
             }
-
-            $amountsHtml = (new UserRepository())->fetchAmountsById($data['user_id']);
         }
+
+        $amountArray = (new UserRepository())->fetchAmountsById($data['user_id']);
+
+        $amountsHtml = $this->fetch('admin/user_amounts.html.twig', [
+            'amounts_array' => $amountArray
+        ]);
 
         return $this->json([
             'ok' => true,

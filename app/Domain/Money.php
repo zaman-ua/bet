@@ -2,18 +2,24 @@
 
 namespace App\Domain;
 
+use App\Repository\CurrencyRepository;
+use RuntimeException;
+
 final class Money
 {
     public readonly int $amount;
     public readonly int $currencyId;
+    public readonly string $symbol;
 
     public function __construct(int $amount, int $currencyId)
     {
         $this->amount = $amount;
         $this->currencyId = $currencyId;
+
+        $this->symbol = (new CurrencyRepository()->getSymbolById($currencyId));
     }
 
-    /** "150.00", "150", "150,5" → Money; без float */
+    // с обычного числа в значение для базы
     public static function fromHuman(string $amount, int $currencyId): self
     {
         // приходит строкой с формы или откуда-то еще
@@ -35,12 +41,32 @@ final class Money
         return new self($amount, $currencyId);
     }
 
-    /** "150.00" */
-    public function toHuman(): string
+    // со значения в базе с кодом или ид валюты
+    public static function fromRaw(int $amount, ?int $currencyId, ?string $currencyCode) : self
+    {
+        if(!empty($currencyId)) {
+            return new self($amount, $currencyId);
+
+        } else if(!empty($currencyCode)) {
+            $currencyId = (new CurrencyRepository()->getIdByCode($currencyCode));
+            return new self($amount, $currencyId);
+        }
+
+        throw new RuntimeException('Invalid currency code or id');
+    }
+
+    // со значения в базе, в человеку понятное
+    public function toHuman(bool $withSymbol = false): string
     {
         $amount = $this->amount / 100;
 
-        return number_format($amount, 2, '.', '');
+        return number_format($amount, 2, '.', '') . ($withSymbol ? ' ' . $this->symbol : '');
+    }
+
+    // должно автоматом сработать когда в шаблоне буду выводить
+    public function __toString() : string
+    {
+        return $this->toHuman(true);
     }
 
     public function add(self $other): self

@@ -9,10 +9,10 @@ use App\Exception\TwigRenderException;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use Twig\TwigFunction;
+use Throwable;
 
 abstract class Controller extends ApiController
 {
-
 //    public function __construct(public Request $request, public Response $response) {
 //
 //
@@ -24,6 +24,53 @@ abstract class Controller extends ApiController
     // сразу же формируем респонс с правильным кодом ответа
     // в контроллере в конце нужно будет только вызвать render() с указанием шаблона и передать переменные шаблона
     public function render(string $template, array $vars = [], int $code = 200) : Response
+    {
+        try {
+            // подмешиваем ошибки валидации и старые данные что бы можно было отобразить в форме
+            $body = $this->fetch($template, $vars);
+
+        } catch (Throwable $e) {
+            throw new TwigRenderException($e->getMessage());
+        }
+
+        // фишка php8 Constructor Property Promotion
+        return $this->response
+            ->withHeader('Content-Type', 'text/html; charset=utf-8')
+//            ->withHeader('X-Content-Type-Options', 'nosniff')
+//            ->withHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+//            ->withHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'")
+            ->withStatus($code)
+            ->write($body);
+    }
+
+    public function fetch(string $template, array $vars = []) : ?string
+    {
+        try {
+            $twig = $this->initTwig();
+
+            $template = $twig->load($template);
+
+            // подмешиваем ошибки валидации и старые данные что бы можно было отобразить в форме
+            return $template->render(array_merge($vars ?? [], [
+                'old' => $this->oldData,
+                'errors' => $this->errors,
+            ]));
+
+        } catch (Throwable $e) {
+            throw new TwigRenderException($e->getMessage());
+        }
+    }
+
+    public function redirect(string $url, int $code = 301) : Response
+    {
+        return $this->response
+            ->withHeader('HTTP/1.1 301 Moved Permanently','')
+            ->withHeader('Location', $url)
+            ->withStatus($code)
+            ->write('');
+    }
+
+    private function initTwig(): Environment
     {
         try {
             $loader = new FilesystemLoader(APP_ROOT . env('TWIG_TEMPLATE', '/templates'));
@@ -40,34 +87,9 @@ abstract class Controller extends ApiController
             $twig->addFunction(new TwigFunction('getUser', 'App\Core\Auth::getUser'));
             $twig->addFunction(new TwigFunction('isAdmin', 'App\Core\Auth::isAdmin'));
 
-            $template = $twig->load($template);
-
-            // подмешиваем ошибки валидации и старые данные что бы можно было отобразить в форме
-            $body = $template->render(array_merge($vars ?? [], [
-                'old' => $this->oldData,
-                'errors' => $this->errors,
-            ]));
-
-        } catch (\Throwable $e) {
+            return $twig;
+        } catch (Throwable $e) {
             throw new TwigRenderException($e->getMessage());
         }
-
-        // фишка php8 Constructor Property Promotion
-        return $this->response
-            ->withHeader('Content-Type', 'text/html; charset=utf-8')
-//            ->withHeader('X-Content-Type-Options', 'nosniff')
-//            ->withHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
-//            ->withHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'")
-            ->withStatus($code)
-            ->write($body);
-    }
-
-    public function redirect(string $url, int $code = 301) : Response
-    {
-        return $this->response
-            ->withHeader('HTTP/1.1 301 Moved Permanently','')
-            ->withHeader('Location', $url)
-            ->withStatus($code)
-            ->write('');
     }
 }
