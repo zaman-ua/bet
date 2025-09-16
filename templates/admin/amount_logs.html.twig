@@ -1,0 +1,40 @@
+{% extends 'index.layout.html.twig' %}
+
+{% block body %}
+    <section class="content">
+        <h1>Фин. лог</h1>
+
+        <table class="table-responsive">
+            <thead>
+            <tr>
+                <th>id</th>
+                <th>created_at</th>
+                <th>user_name</th>
+                <th>bet_id</th>
+                <th>type</th>
+                <th>amount</th>
+                <th>comment</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for log in logs %}
+                <tr>
+                    <td>{{ log.id }}</td>
+                    <td>{{ log.created_at }}</td>
+                    <td>{{ log.user_name }}</td>
+                    <td>{{ log.bet_id }}</td>
+                    <td>{{ log.type }}</td>
+                    <td>{{ log.amount }}</td>
+                    <td>{{ log.comment }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+{% endblock %}
+
+
+{% block javascripts %}
+    <script>
+    </script>
+{% endblock %}

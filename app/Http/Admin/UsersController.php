@@ -58,7 +58,7 @@ final class UsersController extends Controller
 
         $amountArray = (new UserRepository())->fetchAmountsById($data['user_id']);
 
-        $amountsHtml = $this->fetch('admin/user_amounts.html.twig', [
+        $amountsHtml = $this->fetch('shared/user_amounts.html.twig', [
             'amounts_array' => $amountArray
         ]);
 

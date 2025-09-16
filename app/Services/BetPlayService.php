@@ -65,7 +65,7 @@ final class BetPlayService
                 currencyId: $bet['currency_id'],
                 amount: $payout,
                 betId: $betId,
-                comment: 'Ставка выиграна'
+                comment: 'Ставка ' . $result
             ));
 
             Db::commit();

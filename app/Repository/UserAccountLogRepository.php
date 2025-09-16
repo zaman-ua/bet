@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Core\Db\Db;
+use App\Domain\Money;
 use App\DTO\UserAmountLogCreateDTO;
 
 final class UserAccountLogRepository
@@ -48,5 +49,31 @@ final class UserAccountLogRepository
             $dto->amount,
             $dto->comment ?? 'admin_adjust'
         ]);
+    }
+
+    public function fetchAll() : ?array
+    {
+        $all = Db::getAll('SELECT 
+                ual.*,
+                u.name as user_name
+            FROM user_amount_logs as ual
+            INNER JOIN users as u ON ual.user_id = u.id
+            ORDER BY ual.id DESC;
+        ');
+
+        if(!empty($all)) {
+            return $this->processBets($all);
+        }
+
+        return $all;
+    }
+
+    private function processBets($items) : array
+    {
+        foreach ($items as $key => $item) {
+            $items[$key]['amount'] = Money::fromRaw($item['amount'], $item['currency_id']);
+        }
+
+        return $items;
     }
 }

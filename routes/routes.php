@@ -35,4 +35,7 @@ return function (Router $route): void {
     // админка пользователи
     $route->add('GET', '/admin/users', Admin\UsersController::class);
     $route->add('POST', '/admin/users/{id:\d+}/adjust', [Admin\UsersController::class, 'adjust']);
+
+    // админка фин. лог
+    $route->add('GET', '/admin/amount_logs', Admin\AmountLogsController::class);
 };
