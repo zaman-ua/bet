@@ -29,7 +29,7 @@
                     <td>
                         <span id="user-amounts-{{ user.id }}">
                             {% if user.amounts %}
-                                {% include 'admin/user_amounts.html.twig' with { amounts_array: user.amounts_array } %}
+                                {% include 'shared/user_amounts.html.twig' with { amounts_array: user.amounts_array } %}
                             {% else %}
                                 ---
                             {% endif %}

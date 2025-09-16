@@ -4,7 +4,7 @@ namespace App\Http;
 
 use App\Core\Auth;
 use App\Core\Http\Response;
-use App\Repository\BetRepository;
+use App\Repository\UserRepository;
 
 final class HomeController extends Controller
 {
@@ -14,6 +14,8 @@ final class HomeController extends Controller
         if(Auth::isAdmin()) {
             return $this->redirect('/admin/bets');
         }
+
+        $amounts = (new UserRepository()->fetchAmountsById(Auth::getUserId()));
 
         $out[] = [
             'id'   => 1,
@@ -40,6 +42,7 @@ final class HomeController extends Controller
 
         return $this->render('home/index.html.twig', [
             'matches' => $out,
+            'amounts' => $amounts
         ]);
     }
 }

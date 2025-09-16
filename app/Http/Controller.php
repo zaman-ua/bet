@@ -86,6 +86,7 @@ abstract class Controller extends ApiController
             $twig->addFunction(new TwigFunction('isLoggedIn', 'App\Core\Auth::isLoggedIn'));
             $twig->addFunction(new TwigFunction('getUser', 'App\Core\Auth::getUser'));
             $twig->addFunction(new TwigFunction('isAdmin', 'App\Core\Auth::isAdmin'));
+            $twig->addFunction(new TwigFunction('getUserId', 'App\Core\Auth::getUserId'));
 
             return $twig;
         } catch (Throwable $e) {

@@ -6,36 +6,47 @@
         <h1>Делайте ставки!</h1>
 
         {%if isLoggedIn() %}
-        <table class="table-responsive">
-            <thead>
-            <tr>
-                <th>Матч</th>
-                <th>Победа первой команды</th>
-                <th>ничья</th>
-                <th>Победа второй команды</th>
-                <th>Ставка</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for m in matches %}
+
+            <h2>Мой баланс</h2>
+            <span id="user-amounts-{{ getUserId() }}">
+                {% if amounts %}
+                    {% include 'shared/user_amounts.html.twig' with { amounts_array: amounts } %}
+                {% else %}
+                    ---
+                {% endif %}
+            </span>
+
+            <h2>Матчи</h2>
+            <table class="table-responsive">
+                <thead>
                 <tr>
-                    <td>{{ m.win }} — {{ m.loss }}</td>
-                    <td>{{ m.odds.win }}</td>
-                    <td>{{ m.odds.draw }}</td>
-                    <td>{{ m.odds.loss }}</td>
-                    <td>
-                        <input type="number" min="1" max="500" step="1" class="stake" value="10">
-                    </td>
-                    <td>
-                        <button class="bet" data-id="{{ m.id }}" data-outcome="win" data-coefficient="{{ m.odds.win }}">Победа первой команды</button>
-                        <button class="bet" data-id="{{ m.id }}" data-outcome="draw" data-coefficient="{{ m.odds.draw }}">ничья</button>
-                        <button class="bet" data-id="{{ m.id }}" data-outcome="loss" data-coefficient="{{ m.odds.loss }}">Победа второй команды</button>
-                    </td>
+                    <th>Матч</th>
+                    <th>Победа первой команды</th>
+                    <th>ничья</th>
+                    <th>Победа второй команды</th>
+                    <th>Ставка</th>
+                    <th></th>
                 </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                {% for m in matches %}
+                    <tr>
+                        <td>{{ m.win }} — {{ m.loss }}</td>
+                        <td>{{ m.odds.win }}</td>
+                        <td>{{ m.odds.draw }}</td>
+                        <td>{{ m.odds.loss }}</td>
+                        <td>
+                            <input type="number" min="1" max="500" step="1" class="stake" value="10">
+                        </td>
+                        <td>
+                            <button class="bet" data-id="{{ m.id }}" data-outcome="win" data-coefficient="{{ m.odds.win }}">Победа первой команды</button>
+                            <button class="bet" data-id="{{ m.id }}" data-outcome="draw" data-coefficient="{{ m.odds.draw }}">ничья</button>
+                            <button class="bet" data-id="{{ m.id }}" data-outcome="loss" data-coefficient="{{ m.odds.loss }}">Победа второй команды</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         {% endif %}
 
     </section>
@@ -72,7 +83,13 @@
             success: function (resp, status, xhr) {
                 if (resp?.ok) {
                     // успех — редирект или сообщение
-                    window.location = resp.redirect || '/';
+                    //window.location = resp.redirect || '/';
+
+                    alert(resp?.status);
+
+                    // перерисуем кусочек с балансами
+                    $('#user-amounts-{{ getUserId() }}').html(resp?.amountsHtml);
+
                     return;
                 }
                 if (resp?.error) {

@@ -105,6 +105,7 @@ final class UserRepository
         return $all;
     }
 
+    // странно, а чего ты не в UserAmountRepository ?
     public function fetchAmountsById(int $userId) : array
     {
         $amountString = Db::getOne("SELECT am.amounts

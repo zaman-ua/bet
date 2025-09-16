@@ -6,6 +6,7 @@ use App\Core\Auth;
 use App\Core\Http\Response;
 use App\DTO\BetCreateDTO;
 use App\Enums\OutcomeEnum;
+use App\Repository\UserRepository;
 use App\Services\BettingService;
 use App\Validation\CreateBetValidator;
 
@@ -44,9 +45,17 @@ final class BetController extends Controller
                 coefficient: $coefficient
             ));
 
+            // обновляем баланс пользователя так же как и в админке
+            $amountArray = (new UserRepository())->fetchAmountsById(Auth::getUserId());
+            $amountsHtml = $this->fetch('shared/user_amounts.html.twig', [
+                'amounts_array' => $amountArray
+            ]);
+
             return $this->json([
+                'ok' => true,
                 'bet_id' => $betId,
-                'status' => 'created'
+                'status' => 'created',
+                'amountsHtml' => $amountsHtml
             ], 201); // код 201 "Создано"
 
         } catch (\InvalidArgumentException $e) {
