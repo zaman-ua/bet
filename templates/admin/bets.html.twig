@@ -26,7 +26,33 @@
                     <td>{{ bet.outcome }}</td>
                     <td>{{ bet.stake }}</td>
                     <td>{{ bet.coefficient }}</td>
-                    <td>{{ bet.status }}</td>
+                    <td id="status-row-{{ bet.id }}">
+                        <span>
+                            {{ bet.status }}
+                        </span>
+
+                        {% if bet.status == 'placed' %}
+                            <div class="hidden status-block" id="status-{{ bet.id }}">
+                                <form class="form js-form-status" method="POST" action="/admin/bets/{{ bet.id }}/play">
+                                    <input type="hidden" name="csrf" value="{{ csrf_token() }}" />
+                                    <input type="hidden" name="bet_id" value="{{ bet.id }}">
+                                    <input type="hidden" name="user_id" value="{{ bet.user_id }}">
+
+                                    <select name="result">
+                                        <option value="won" >won</option>
+                                        <option value="lost" >lost</option>
+
+                                    </select>
+
+                                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                                </form>
+                            </div>
+
+                            <a class="status-edit-button" data-id="{{ bet.id }}">
+                                <img src="{{ assets('images/edit.png') }}" alt="status">
+                            </a>
+                        {% endif %}
+                    </td>
                     <td>{{ bet.payout }}</td>
                 </tr>
             {% endfor %}
@@ -37,59 +63,98 @@
 
 
 {% block javascripts %}
-<script>
-    $(document).on('click', '.bet', function (e) {
-        e.preventDefault();
+    <script>
+        $(function () {
 
-        const $btn = $(this);
-        const $row = $btn.closest('tr');              // ищем всю строку
-        const $input = $row.find('input.stake').first(); // инпут в этой строке
+            $(document).on('click', '.status-edit-button', function (e) {
+                const $a = $(this);
+                var id = $a.data('id');
 
-        var data = {
-            currency_id: 1,
-            match_id: $btn.data('id'),
-            outcome: $btn.data('outcome'),
-            coefficient: $btn.data('coefficient'),
-            stake: $input.val(),
-            csrf: '{{ csrf_token() }}'
-        };
+                $('#status-'+id).toggle();
+                $('.status-edit-button[data-id='+id+']').hide();
+            });
 
-        $.ajax({
-            url: '/users/bet',
-            method: 'POST',
-            data: data,
-            dataType: 'json',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            },
-            success: function (resp, status, xhr) {
-                if (resp?.ok) {
-                    // успех — редирект или сообщение
-                    window.location = resp.redirect || '/';
-                    return;
+
+            $(document).on('submit', '.js-form-status', function (e) {
+                e.preventDefault();
+
+                const $form = $(this);
+                const action = $form.attr('action') || window.location.pathname;
+                const method = ($form.attr('method') || 'POST').toUpperCase();
+
+                const betId = $form.find('[name="bet_id"]').val();
+
+                // очистим предыдущие ошибки
+                // $form.find('.field-error').remove();
+                // $form.find('.is-invalid').removeClass('is-invalid');
+
+                $('#status-'+betId).hide();
+
+                $.ajax({
+                    url: action,
+                    method: method,
+                    data: $form.serialize(),              // работает с data[login] и пр.
+                    dataType: 'json',                     // ждём JSON
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    success: function (resp, status, xhr) {
+                        if (resp?.ok) {
+
+                            // перерисуем кусочек с балансами
+                            $('#status-row-'+betId).html(resp?.statusHtml);
+
+                            $('.status-edit-button[data-id='+betId+']').show();
+
+                            // // сбрасываем форму
+                            // $(form).find('input, textarea').each(function () {
+                            //     this.setAttribute('value', 0);
+                            // });
+
+                            return;
+                        }
+                        if (resp?.errors) {
+                            renderErrors($form, resp.errors);
+                            return;
+                        }
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 422) {
+                            // валидация: { errors: { field: "message", ... } }
+                            const json = xhr.responseJSON || {};
+                            renderErrors($form, json.errors || {});
+                        } else {
+                            alert('Ошибка сервера. Попробуйте позже.');
+                        }
+                    },
+                    complete: function () {
+                        // $btn.prop('disabled', false);
+                    }
+                });
+            });
+
+            function renderErrors($form, errors) {
+                // errors: { login: '...', password: '...', ... }
+                for (const [field, message] of Object.entries(errors)) {
+                    // для полей вида data[login] → найдём по name
+                    const selector = `[name="data[${field}]"]`;
+                    const $input = $form.find(selector);
+                    if ($input.length) {
+                        $input.addClass('is-invalid')
+                            .after(`<div class="field-error" style="color:#c00;font-size:12px;margin-top:4px;">${escapeHtml(message)}</div>`);
+                    } else {
+                        // общий блок вверху, если поле не найдено
+                        $form.prepend(`<div class="field-error" style="color:#c00;margin-bottom:8px;">${escapeHtml(message)}</div>`);
+                    }
                 }
-                if (resp?.error) {
-                    renderErrors($form, resp.error);
-                    return;
-                }
-                // если сервер вернул HTML вместо JSON — заменим форму (fallback)
-                if (xhr.getResponseHeader('Content-Type')?.includes('text/html')) {
-                    $form.replaceWith(resp);
-                }
-            },
-            error: function (xhr) {
-                if (xhr.status === 422 || xhr.status === 409 || xhr.status === 400) {
-                    const json = xhr.responseJSON || {};
-                    alert(json.error);
-                } else {
-                    alert('Ошибка сервера. Попробуйте позже.');
-                }
-            },
-            // complete: function () {
-            //     $btn.prop('disabled', false);
-            // }
+            }
+
+            function escapeHtml(str) {
+                return String(str ?? '').replace(/[&<>"']/g, s => ({
+                    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+                })[s]);
+            }
         });
-    });
-</script>
+    </script>
 {% endblock %}

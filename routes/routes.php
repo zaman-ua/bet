@@ -10,25 +10,29 @@ use App\Http\User\LogoutController;
 use App\Http\Admin;
 
 return function (Router $route): void {
+    // главная
     $route->add('GET', '/', HomeController::class);
-    $route->add('GET', '/{id:\d+}', [HomeController::class, 'show']);
 
-
+    // регистация
     $route->add('GET', '/users/registration', [RegistrationController::class, 'index']);
     $route->add('POST', '/users/registration', [RegistrationController::class, 'register']);
 
+    // вход
     $route->add('GET', '/users/login', [LoginController::class, 'index']);
     $route->add('POST', '/users/login', [LoginController::class, 'login']);
 
+    // что бы и так и так принимало
     $route->add('GET', '/users/logout', [LogoutController::class, 'index']);
     $route->add('POST', '/users/logout', [LogoutController::class, 'index']);
 
+    // поставить ставку
     $route->add('POST', '/users/bet', [BetController::class, 'store']);
 
-
+    // админка ставки
     $route->add('GET', '/admin/bets', Admin\BetsController::class);
+    $route->add('POST', '/admin/bets/{id:\d+}/play', [Admin\BetsController::class, 'play']);
 
-
+    // админка пользователи
     $route->add('GET', '/admin/users', Admin\UsersController::class);
     $route->add('POST', '/admin/users/{id:\d+}/adjust', [Admin\UsersController::class, 'adjust']);
 };

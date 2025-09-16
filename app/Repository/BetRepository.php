@@ -49,6 +49,8 @@ final class BetRepository
     public function fetchAll() : ?array
     {
         $all = Db::getAll('SELECT 
+                b.id,
+                b.user_id,
                 b.created_at,
                 u.name as user_name,
                 /*c.code,*/
@@ -62,6 +64,7 @@ final class BetRepository
             FROM bets as b
             INNER JOIN users as u ON b.user_id = u.id
             /*INNER JOIN currencies as c ON b.currency_id = c.id*/
+            ORDER BY b.id DESC;
         ');
 
         if(!empty($all)) {
@@ -77,6 +80,7 @@ final class BetRepository
             $items[$key]['stake'] = Money::fromRaw($item['stake'], $item['currency_id']);
 
             $items[$key]['coefficient'] = ($item['coefficient'] / 100);
+            $items[$key]['payout'] = ($item['payout'] / 100);
         }
 
         return $items;

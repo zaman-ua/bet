@@ -90,7 +90,8 @@ final class UserRepository
                 FROM user_amounts ua
                 JOIN currencies c ON c.id = ua.currency_id
                 GROUP BY ua.user_id
-            ) am ON am.user_id = u.id;
+            ) am ON am.user_id = u.id
+            ORDER BY u.id DESC;
         ");
 
         if(!empty($all)) {

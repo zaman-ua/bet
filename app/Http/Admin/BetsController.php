@@ -6,6 +6,8 @@ use App\Core\Auth;
 use App\Core\Http\Response;
 use App\Http\Controller;
 use App\Repository\BetRepository;
+use App\Services\BetPlayService;
+use RuntimeException;
 
 final class BetsController extends Controller
 {
@@ -29,6 +31,30 @@ final class BetsController extends Controller
 
         return $this->render('admin/bets.html.twig', [
             'bets' => $bets,
+        ]);
+    }
+
+    public function play() : Response
+    {
+        $data = $this->request->post;
+
+        // валидация
+        // TODO
+
+
+        if(empty($data['bet_id']) || !in_array($data['result'], ['won','lost'])) {
+            throw new RuntimeException('wrong result');
+        }
+
+        $betId = (new BetPlayService())->play($data['bet_id'], $data['result']);
+
+
+        // перерисовать payout
+        // TODO
+
+        return $this->json([
+            'ok' => true,
+            'statusHtml' => $data['result']
         ]);
     }
 }

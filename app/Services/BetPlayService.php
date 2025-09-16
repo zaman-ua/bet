@@ -42,20 +42,22 @@ final class BetPlayService
             // ставка проиграна, изменений баланса нет
             if($result === 'lost') {
                 $this->bets->markLost($betId);
+                $payout = 0;
             }
 
             // ставка выиграна
+            if($result === 'won') {
+                // считаем выплату
+                $stake  = (int)$bet['stake'];
+                $coefficient  = (int)$bet['coefficient'] / 100;
+                $payout = $stake * $coefficient;
 
-            // считаем выплату
-            $stake  = (int)$bet['stake'];
-            $coefficient  = (int)$bet['coefficient'];
-            $payout = $stake * $coefficient;
+                // вносим в баланс пользователя
+                $this->amounts->credit((int)$bet['user_id'], $bet['currency_id'], $payout);
 
-            // вносим в баланс пользователя
-            $this->amounts->credit((int)$bet['user_id'], $bet['currency_id'], $payout);
-
-            // отмечаем ставку выигранной и выплату
-            $this->bets->markWon($betId, $payout);
+                // отмечаем ставку выигранной и выплату
+                $this->bets->markWon($betId, $payout);
+            }
 
             // лог движения
             $this->userAccountLogs->logBetWin(new UserAmountLogCreateDTO(
