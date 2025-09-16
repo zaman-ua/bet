@@ -72,22 +72,6 @@
 <script>
     $(function () {
 
-        $('.table-responsive table').each(function () {
-            const $t = $(this);
-            const headers = [];
-            $t.find('thead th').each(function (i) {
-                headers[i] = $(this).text().trim();
-            });
-            $t.find('tbody tr').each(function () {
-                $(this).children('td').each(function (i) {
-                    // не перезаписываем, если уже задано вручную
-                    if (!this.hasAttribute('data-th')) {
-                        this.setAttribute('data-th', headers[i] ?? '');
-                    }
-                });
-            });
-        });
-
         $(document).on('click', '.user-adjust-edit-button', function (e) {
             const $a = $(this);
             var id = $a.data('id');

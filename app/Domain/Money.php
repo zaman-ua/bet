@@ -42,7 +42,7 @@ final class Money
     }
 
     // со значения в базе с кодом или ид валюты
-    public static function fromRaw(int $amount, ?int $currencyId, ?string $currencyCode) : self
+    public static function fromRaw(int $amount, ?int $currencyId = null, ?string $currencyCode = null) : self
     {
         if(!empty($currencyId)) {
             return new self($amount, $currencyId);

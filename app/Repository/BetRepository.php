@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Core\Db\Db;
+use App\Domain\Money;
 use App\DTO\BetCreateDTO;
 
 final class BetRepository
@@ -47,19 +48,37 @@ final class BetRepository
 
     public function fetchAll() : ?array
     {
-        return Db::getAll('SELECT 
+        $all = Db::getAll('SELECT 
                 b.created_at,
-                u.name,
-                c.code,
+                u.name as user_name,
+                /*c.code,*/
                 b.match_id,
                 b.outcome,
                 b.stake,
                 b.coefficient,
+                b.currency_id,
                 b.status,
                 b.payout
             FROM bets as b
             INNER JOIN users as u ON b.user_id = u.id
-            INNER JOIN currencies as c ON b.currency_id = c.id
+            /*INNER JOIN currencies as c ON b.currency_id = c.id*/
         ');
+
+        if(!empty($all)) {
+            return $this->processBets($all);
+        }
+
+        return $all;
+    }
+
+    private function processBets($items) : array
+    {
+        foreach ($items as $key => $item) {
+            $items[$key]['stake'] = Money::fromRaw($item['stake'], $item['currency_id']);
+
+            $items[$key]['coefficient'] = ($item['coefficient'] / 100);
+        }
+
+        return $items;
     }
 }

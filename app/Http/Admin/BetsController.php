@@ -17,6 +17,15 @@ final class BetsController extends Controller
         }
 
         $bets = (new BetRepository())->fetchAll();
+        $matches = require APP_ROOT . '/config/matches.php';
+
+        if(!empty($bets) && !empty($matches)) {
+            foreach ($bets as $key => $bet) {
+                if(isset($matches[$bet['match_id']])) {
+                    $bets[$key]['match'] = $matches[$bet['match_id']]['win'] . ' - ' . $matches[$bet['match_id']]['loss'];
+                }
+            }
+        }
 
         return $this->render('admin/bets.html.twig', [
             'bets' => $bets,

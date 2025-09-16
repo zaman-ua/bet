@@ -29,19 +29,24 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for m in matches %}
+                {% for match in matches %}
                     <tr>
-                        <td>{{ m.win }} — {{ m.loss }}</td>
-                        <td>{{ m.odds.win }}</td>
-                        <td>{{ m.odds.draw }}</td>
-                        <td>{{ m.odds.loss }}</td>
+                        <td>{{ match.win }} — {{ match.loss }}</td>
+                        <td>{{ match.odds.win }}</td>
+                        <td>{{ match.odds.draw }}</td>
+                        <td>{{ match.odds.loss }}</td>
                         <td>
                             <input type="number" min="1" max="500" step="1" class="stake" value="10">
+                            <select class="currency">
+                                {% for val, label in currencies %}
+                                    <option value="{{ val }}" >{{ label }}</option>
+                                {% endfor %}
+                            </select>
                         </td>
                         <td>
-                            <button class="bet" data-id="{{ m.id }}" data-outcome="win" data-coefficient="{{ m.odds.win }}">Победа первой команды</button>
-                            <button class="bet" data-id="{{ m.id }}" data-outcome="draw" data-coefficient="{{ m.odds.draw }}">ничья</button>
-                            <button class="bet" data-id="{{ m.id }}" data-outcome="loss" data-coefficient="{{ m.odds.loss }}">Победа второй команды</button>
+                            <button class="bet" data-id="{{ match.id }}" data-outcome="win" data-coefficient="{{ match.odds.win }}">Победа первой команды</button>
+                            <button class="bet" data-id="{{ match.id }}" data-outcome="draw" data-coefficient="{{ match.odds.draw }}">ничья</button>
+                            <button class="bet" data-id="{{ match.id }}" data-outcome="loss" data-coefficient="{{ match.odds.loss }}">Победа второй команды</button>
                         </td>
                     </tr>
                 {% endfor %}
@@ -60,14 +65,15 @@
 
         const $btn = $(this);
         const $row = $btn.closest('tr');              // ищем всю строку
-        const $input = $row.find('input.stake').first(); // инпут в этой строке
+        const $inputStake = $row.find('input.stake').first(); // инпут в этой строке
+        const $inputCurrency = $row.find('select.currency').first();
 
         var data = {
-            currency_id: 1,
+            currency_id: $inputCurrency.val(),
             match_id: $btn.data('id'),
             outcome: $btn.data('outcome'),
             coefficient: $btn.data('coefficient'),
-            stake: $input.val(),
+            stake: $inputStake.val(),
             csrf: '{{ csrf_token() }}'
         };
 
