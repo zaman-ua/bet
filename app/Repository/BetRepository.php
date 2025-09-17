@@ -78,6 +78,39 @@ final class BetRepository
         return $all;
     }
 
+    // дублирование кода,
+    // но доделываю я на скорую руку, простите
+    public function fetchBetsByUserId(int $userId) : ?array
+    {
+        $all = Db::getAll('SELECT 
+                b.id,
+                b.user_id,
+                b.created_at,
+                u.name as user_name,
+                b.match_id,
+                b.outcome,
+                b.stake,
+                b.coefficient,
+                b.currency_id,
+                b.status,
+                b.payout
+            FROM bets as b
+            INNER JOIN users as u ON b.user_id = u.id
+            WHERE b.user_id = :user_id
+            ORDER BY b.id DESC;
+        ', ['user_id'=>$userId]);
+
+        if(!empty($all)) {
+            foreach ($all as $key => $item) {
+                $all[$key] = $this->processBets($item);
+            }
+
+            return $all;
+        }
+
+        return $all;
+    }
+
     public function getById(int $betId) : ?array
     {
         $row = Db::getRow('SELECT 
@@ -114,5 +147,18 @@ final class BetRepository
        $item['payout'] = ($item['payout'] / 100);
 
         return $item;
+    }
+
+    public function processMatches(?array $bets = null, ?array $matches = null) : ?array
+    {
+        if(!empty($bets) && !empty($matches)) {
+            foreach ($bets as $key => $bet) {
+                if(isset($matches[$bet['match_id']])) {
+                    $bets[$key]['match'] = $matches[$bet['match_id']]['win'] . ' - ' . $matches[$bet['match_id']]['loss'];
+                }
+            }
+        }
+
+        return $bets;
     }
 }
