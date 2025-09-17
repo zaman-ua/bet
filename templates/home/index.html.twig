@@ -7,7 +7,7 @@
             <h1>Делайте ставки!</h1>
 
             <h2>Мой баланс</h2>
-            <span id="user-amounts-{{ getUserId() }}">
+            <span id="user-amounts-{{ getUserId() }}" class="form">
                 {% if amounts %}
                     {% include 'shared/user_amounts.html.twig' with { amounts_array: amounts } %}
                 {% else %}
@@ -43,9 +43,9 @@
                             </select>
                         </td>
                         <td>
-                            <button class="bet" data-id="{{ match.id }}" data-outcome="win" data-coefficient="{{ match.odds.win }}">Победа первой команды</button>
-                            <button class="bet" data-id="{{ match.id }}" data-outcome="draw" data-coefficient="{{ match.odds.draw }}">ничья</button>
-                            <button class="bet" data-id="{{ match.id }}" data-outcome="loss" data-coefficient="{{ match.odds.loss }}">Победа второй команды</button>
+                            <button class="bet btn small-btn" data-id="{{ match.id }}" data-outcome="win" data-coefficient="{{ match.odds.win }}">Победа первой команды</button>
+                            <button class="bet btn small-btn" data-id="{{ match.id }}" data-outcome="draw" data-coefficient="{{ match.odds.draw }}">ничья</button>
+                            <button class="bet btn small-btn" data-id="{{ match.id }}" data-outcome="loss" data-coefficient="{{ match.odds.loss }}">Победа второй команды</button>
                         </td>
                     </tr>
                 {% endfor %}

@@ -48,11 +48,10 @@
                         <option value="address" {%if old.contacts.0.type == 'address' %}selected{% endif %}>address</option>
                     </select>
                     <input class="input" type="text" name="contacts[0][value]" id="contacts-0-value" placeholder="value" value="{{ old.contacts.0.value }}" />
-                    <button type="button" class="btn-remove" aria-label="Remove">−</button>
                 </div>
             </div>
 
-            <button type="button" id="add-contact" class="btn">+ add contact</button>
+            <button type="button" id="add-contact" class="btn small-btn">+ add contact</button>
 
             <template id="contact-template">
                 <div class="contact-row" data-index="__INDEX__">
@@ -62,7 +61,7 @@
                         <option value="address">address</option>
                     </select>
                     <input class="input" type="text" name="contacts[__INDEX__][value]" id="contacts-__INDEX__-value" placeholder="value" />
-                    <button type="button" class="btn-remove" aria-label="Remove">−</button>
+                    <button type="button" class="btn-remove btn small-btn" aria-label="Remove">−</button>
                 </div>
             </template>
 

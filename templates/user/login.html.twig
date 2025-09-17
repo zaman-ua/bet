@@ -16,10 +16,12 @@
             <input class="input" type="password" name="data[password]" id="data-password" placeholder="password" value="{{ old.data.password }}"/>
             {% if errors.password %} {{ errors.password }} {% endif %}
 
-            <input type="hidden" name="data[remember_me]" value="0">
-            <input class="input" type="checkbox" name="data[remember_me]"
-                 id="data-remember-me" value="1" {% if old.data.remember_me %}checked{% endif %} />
-            <label for="data-remember-me">remember_me</label>
+            <div class="checkbox-row">
+                <input type="hidden" name="data[remember_me]" value="0">
+                <input class="input" type="checkbox" name="data[remember_me]"
+                     id="data-remember-me" value="1" {% if old.data.remember_me %}checked{% endif %} />
+                <label for="data-remember-me">remember_me</label>
+            </div>
 
             <input class="btn" type="submit" value="Login" />
         </form>

@@ -272,3 +272,146 @@ h1 {
     }
     .table-responsive tbody td > * { flex: 1 1 auto; text-align: right; }
 }
+
+
+
+
+
+
+
+
+/* центрирование секции */
+.content {
+    display: grid;
+    place-items: center;          /* центр по вертикали/горизонтали */
+}
+
+/* заголовок */
+.content h1 {
+    margin: 0 0 12px;
+    text-align: center;
+    font-size: 22px;
+}
+
+/* карточка формы */
+.form {
+    width: 100%;
+    max-width: 380px;
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #e6e6e6;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.04);
+}
+
+/* инпуты */
+.input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    font: inherit;
+}
+.input:focus {
+    outline: 2px solid #4f46e5;  /* заметный фокус */
+    outline-offset: 1px;
+}
+
+.checkbox-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+/* чекбокс + подпись в одну линию */
+#data-remember-me {
+    margin-right: 8px;
+    width: 20px;
+}
+label[for="data-remember-me"] {
+    font-size: 14px;
+    user-select: none;
+}
+
+/* кнопка */
+.btn {
+    width: 100%;
+    padding: 12px;
+    border: 0;
+    border-radius: 8px;
+    background: #111;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn:hover { filter: brightness(0.95); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .6; cursor: default; }
+
+.small-btn {
+    width: fit-content;
+}
+
+/* чуть больше воздуха на экранах побольше */
+@media (min-width: 480px) {
+    .form { padding: 20px; gap: 14px; max-width: 420px; }
+    .content h1 { font-size: 24px; }
+}
+
+/* если оборачиваете ошибки в .error — подсветка */
+.error { color: #b91c1c; font-size: 12px; }
+
+
+
+
+
+
+
+
+/* общий вид select как у инпутов */
+.form select{
+    display: block;
+    width: 100%;
+    padding: 12px 36px 12px 12px;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    background: #fff;
+    font: inherit;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="%23666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 8 10 12 14 8"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px 12px;
+}
+.form select:focus{
+    outline: 2px solid #4f46e5;
+    outline-offset: 1px;
+}
+
+/* селект пола — на всю ширину (как инпуты) */
+#data-gender{ width: 100%; }
+
+/* контактная строка: селект + инпут в одну линию */
+.contact-row{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.contact-row select{
+    flex: 0 0 160px;   /* фиксированная ширина селекта */
+    width: 160px;
+}
+.contact-row input[type="text"],
+.contact-row .input{
+    flex: 1 1 auto;    /* инпут растягивается */
+    min-width: 0;      /* не выпирает на узких экранах */
+}
+
+/* чуть ужимаем селект на очень узких экранах */
+@media (max-width: 360px){
+    .contact-row select{ flex-basis: 120px; width: 120px; }
+}
