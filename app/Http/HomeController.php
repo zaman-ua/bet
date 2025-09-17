@@ -16,15 +16,20 @@ final class HomeController extends Controller
             return $this->redirect('/admin/bets');
         }
 
-        $amounts = (new UserRepository()->fetchAmountsById(Auth::getUserId()));
-        $currencies = (new CurrencyRepository()->getAssoc());
+        if(Auth::isLoggedIn()) {
+            $userId = Auth::getUserId();
+            if($userId) {
+                $amounts = (new UserRepository()->fetchAmountsById($userId));
+            }
+        }
 
+        $currencies = (new CurrencyRepository()->getAssoc());
         $matches = require APP_ROOT . '/config/matches.php';
 
         return $this->render('home/index.html.twig', [
             'matches' => $matches,
-            'amounts' => $amounts,
-            'currencies' => $currencies,
+            'amounts' => $amounts ?? [],
+            'currencies' => $currencies ?? [],
         ]);
     }
 }

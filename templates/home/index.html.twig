@@ -3,9 +3,8 @@
 {% block body %}
     <section class="content">
 
-        <h1>Делайте ставки!</h1>
-
         {%if isLoggedIn() %}
+            <h1>Делайте ставки!</h1>
 
             <h2>Мой баланс</h2>
             <span id="user-amounts-{{ getUserId() }}">
@@ -56,6 +55,10 @@
             <h2>Мои ставки</h2>
             <table class="table-responsive">
             </table>
+        {% else %}
+            <h1>Привет гость</h1>
+
+            <p><a href="/users/registration">Зарегистрируйтся</a> или <a href="/users/login">авторизуйся</a> для начала</p>
         {% endif %}
 
     </section>

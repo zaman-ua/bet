@@ -22,6 +22,7 @@ class Admin extends AbstractSeed
             'name' => 'Admin',
             'password_hash' => password_hash('1234qwer', PASSWORD_DEFAULT),
             'is_admin' => true,
+            'birth_date' => '1990-01-01',
         ])->save();
     }
 }
