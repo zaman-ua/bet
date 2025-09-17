@@ -75,6 +75,59 @@
     });
 </script>
 
+<script>
+    // безопасно экранируем текст, чтобы не прокинуть HTML
+    function escapeHtml(s){
+        return String(s)
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;')
+            .replace(/'/g,'&#039;');
+    }
+
+    /**
+     * Показывает всплывающее сообщение.
+     * type: 'success' | 'warning' | 'danger'
+     * text: строка (или массив/объект с ошибками)
+     * timeoutMs: через сколько скрыть (по умолчанию 4000)
+     */
+    function flash(type, text, timeoutMs = 4000){
+        // поддержим объект/массив ошибок
+        if (Array.isArray(text)) text = text.join('\n');
+        else if ($.isPlainObject(text)) {
+            text = Object.values(text).flat().join('\n');
+        }
+
+        const $wrap = $('#flash-container');
+        const $el = $(`
+    <div class="alert alert-${type}" role="${type==='danger'?'alert':'status'}">
+      <div class="alert-body">${escapeHtml(text)}</div>
+      <button class="alert-close" aria-label="Закрыть">&times;</button>
+    </div>
+  `);
+
+        // закрытие по кнопке
+        $el.on('click', '.alert-close', function(){ removeEl(); });
+
+        // автозакрытие, пауза при ховере
+        let timer = setTimeout(removeEl, timeoutMs);
+        $el.on('mouseenter', () => clearTimeout(timer));
+        $el.on('mouseleave', () => timer = setTimeout(removeEl, 1200));
+
+        function removeEl(){
+            $el.removeClass('show');
+            // подождём анимацию
+            setTimeout(() => $el.remove(), 200);
+        }
+
+        $wrap.append($el);
+        // дать браузеру нанести в DOM, потом включить анимацию
+        requestAnimationFrame(()=> $el.addClass('show'));
+    }
+</script>
+
+
 {% block javascripts %}{% endblock %}
 </body>
 </html>

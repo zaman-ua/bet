@@ -32,7 +32,7 @@ final class BettingService
 
             // если баланса не хватает - ошибка
             if ((int)$amount['amount'] < $dto->stake) {
-                throw new RuntimeException('insufficient_funds');
+                throw new RuntimeException('Не достаточно денег');
             }
 
             // списание

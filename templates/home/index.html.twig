@@ -16,6 +16,9 @@
             </span>
 
             <h2>Матчи</h2>
+
+            <div id="flash-container" aria-live="polite" aria-atomic="true"></div>
+
             <table class="table-responsive">
                 <thead>
                 <tr>
@@ -95,10 +98,8 @@
             },
             success: function (resp, status, xhr) {
                 if (resp?.ok) {
-                    // успех — редирект или сообщение
-                    //window.location = resp.redirect || '/';
-
-                    alert(resp?.status);
+                    // успех
+                    flash('success', resp?.status || 'Готово.');
 
                     // перерисуем кусочек с балансами
                     $('#user-amounts-{{ getUserId() }}').html(resp?.amountsHtml);
@@ -106,20 +107,18 @@
                     return;
                 }
                 if (resp?.error) {
-                    renderErrors($form, resp.error);
+                    flash('warning', resp.error);
                     return;
                 }
-                // если сервер вернул HTML вместо JSON — заменим форму (fallback)
-                if (xhr.getResponseHeader('Content-Type')?.includes('text/html')) {
-                    $form.replaceWith(resp);
-                }
+
+                return;
             },
             error: function (xhr) {
                 if (xhr.status === 422 || xhr.status === 409 || xhr.status === 400) {
                     const json = xhr.responseJSON || {};
-                    alert(json.error);
+                    flash('warning', json.error || 'Проверьте введённые данные.');
                 } else {
-                    alert('Ошибка сервера. Попробуйте позже.');
+                    flash('danger', 'Ошибка сервера. Попробуйте позже.');
                 }
             },
             // complete: function () {

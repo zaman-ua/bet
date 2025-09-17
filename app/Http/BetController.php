@@ -54,14 +54,13 @@ final class BetController extends Controller
             return $this->json([
                 'ok' => true,
                 'bet_id' => $betId,
-                'status' => 'created',
+                'status' => 'Ставка успешно создана',
                 'amountsHtml' => $amountsHtml
             ], 201); // код 201 "Создано"
 
         } catch (\InvalidArgumentException $e) {
             return $this->json([
-                'error' => 'validation',
-                'message' => $e->getMessage()
+                'error' => $e->getMessage()
             ], 422); // ошибка
 
         } catch (\RuntimeException $e) {

@@ -415,3 +415,47 @@ label[for="data-remember-me"] {
 @media (max-width: 360px){
     .contact-row select{ flex-basis: 120px; width: 120px; }
 }
+
+
+
+
+
+
+
+
+
+#flash-container{
+    display:flex; flex-direction:column; gap:.5rem; margin-bottom:1rem;
+}
+
+.alert{
+    position:relative;
+    display:flex; align-items:flex-start; gap:.75rem;
+    padding:.75rem 1rem;
+    border:1px solid var(--border);
+    border-left-width:4px;
+    border-radius:.5rem;
+    background:var(--bg);
+    color:var(--text);
+    box-shadow:0 4px 12px rgba(0,0,0,.06);
+    opacity:0; transform:translateY(-6px);
+    transition:opacity .2s ease, transform .2s ease;
+    font-size:14px; line-height:1.45;
+}
+.alert.show{ opacity:1; transform:translateY(0); }
+
+.alert .alert-close{
+    margin-left:auto;
+    border:0; background:transparent; cursor:pointer;
+    font-size:18px; line-height:1; opacity:.6;
+}
+.alert .alert-close:hover{ opacity:1; }
+
+/* Цветовые темы “как у bootstrap” */
+.alert-success{ --bg:#d1e7dd; --border:#198754; --text:#0f5132; }
+.alert-warning{ --bg:#fff3cd; --border:#ffc107; --text:#664d03; }
+.alert-danger { --bg:#f8d7da; --border:#dc3545; --text:#842029; }
+
+
+
+
