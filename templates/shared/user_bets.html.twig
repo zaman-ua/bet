@@ -1,0 +1,26 @@
+<table class="table-responsive">
+    <thead>
+    <tr>
+        <th>created_at</th>
+        <th>match</th>
+        <th>outcome</th>
+        <th>stake</th>
+        <th>coefficient</th>
+        <th>status</th>
+        <th>payout</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for bet in bets %}
+        <tr>
+            <td>{{ bet.created_at }}</td>
+            <td>{{ bet.match }}</td>
+            <td>{{ bet.outcome }}</td>
+            <td>{{ bet.stake }}</td>
+            <td>{{ bet.coefficient }}</td>
+            <td>{{ bet.status }}</td>
+            <td>{{ bet.payout }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

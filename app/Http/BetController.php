@@ -6,6 +6,7 @@ use App\Core\Auth;
 use App\Core\Http\Response;
 use App\DTO\BetCreateDTO;
 use App\Enums\OutcomeEnum;
+use App\Repository\BetRepository;
 use App\Repository\UserRepository;
 use App\Services\BettingService;
 use App\Validation\CreateBetValidator;
@@ -51,11 +52,20 @@ final class BetController extends Controller
                 'amounts_array' => $amountArray
             ]);
 
+            $bets = (new BetRepository())->fetchBetsByUserId($userId);
+            $matches = require APP_ROOT . '/config/matches.php';
+            $bets = (new BetRepository())->processMatches($bets ?? [], $matches);
+
+            $betsTable = $this->fetch('shared/user_bets.html.twig', [
+                'bets' => $bets
+            ]);
+
             return $this->json([
                 'ok' => true,
                 'bet_id' => $betId,
                 'status' => 'Ставка успешно создана',
-                'amountsHtml' => $amountsHtml
+                'amountsHtml' => $amountsHtml,
+                'betsTable' => $betsTable
             ], 201); // код 201 "Создано"
 
         } catch (\InvalidArgumentException $e) {

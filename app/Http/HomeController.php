@@ -28,8 +28,6 @@ final class HomeController extends Controller
         $currencies = (new CurrencyRepository()->getAssoc());
         $matches = require APP_ROOT . '/config/matches.php';
 
-        // такой же код в админке
-        // доделываю на скорую руку, по хорошему вынести в сервис/репозиторий куда просто передать нассив ставок и матчей
         $bets = (new BetRepository())->processMatches($bets ?? [], $matches);
 
         return $this->render('home/index.html.twig', [

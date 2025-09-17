@@ -56,32 +56,14 @@
             </table>
 
             <h2>Мои ставки</h2>
-            <table class="table-responsive">
-                <thead>
-                <tr>
-                    <th>created_at</th>
-                    <th>match</th>
-                    <th>outcome</th>
-                    <th>stake</th>
-                    <th>coefficient</th>
-                    <th>status</th>
-                    <th>payout</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for bet in bets %}
-                    <tr>
-                        <td>{{ bet.created_at }}</td>
-                        <td>{{ bet.match }}</td>
-                        <td>{{ bet.outcome }}</td>
-                        <td>{{ bet.stake }}</td>
-                        <td>{{ bet.coefficient }}</td>
-                        <td>{{ bet.status }}</td>
-                        <td>{{ bet.payout }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+            <div id="user-bets-{{ getUserId() }}" class="user-bets">
+                {% if amounts %}
+                    {% include 'shared/user_bets.html.twig' with { bets: bets } %}
+                {% else %}
+                    ---
+                {% endif %}
+            </div>
+
         {% else %}
             <h1>Привет гость</h1>
 
@@ -127,6 +109,7 @@
 
                     // перерисуем кусочек с балансами
                     $('#user-amounts-{{ getUserId() }}').html(resp?.amountsHtml);
+                    $('#user-bets-{{ getUserId() }}').html(resp?.betsTable);
 
                     return;
                 }
