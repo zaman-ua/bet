@@ -53,7 +53,7 @@
                             </a>
                         {% endif %}
                     </td>
-                    <td>{{ bet.payout }}</td>
+                    <td id="payout-row-{{ bet.id }}">{{ bet.payout }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -104,6 +104,7 @@
 
                             // перерисуем кусочек с балансами
                             $('#status-row-'+betId).html(resp?.statusHtml);
+                            $('#payout-row-'+betId).html(resp?.payoutHtml);
 
                             $('.status-edit-button[data-id='+betId+']').show();
 

@@ -47,14 +47,12 @@ final class BetsController extends Controller
         }
 
         $betId = (new BetPlayService())->play($data['bet_id'], $data['result']);
-
-
-        // перерисовать payout
-        // TODO
+        $bet = (new BetRepository())->getById($betId);
 
         return $this->json([
             'ok' => true,
-            'statusHtml' => $data['result']
+            'statusHtml' => $bet['status'],
+            'payoutHtml' => $bet['payout']
         ]);
     }
 }

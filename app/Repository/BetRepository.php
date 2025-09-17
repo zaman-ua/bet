@@ -68,21 +68,51 @@ final class BetRepository
         ');
 
         if(!empty($all)) {
-            return $this->processBets($all);
+            foreach ($all as $key => $item) {
+                $all[$key] = $this->processBets($item);
+            }
+
+            return $all;
         }
 
         return $all;
     }
 
-    private function processBets($items) : array
+    public function getById(int $betId) : ?array
     {
-        foreach ($items as $key => $item) {
-            $items[$key]['stake'] = Money::fromRaw($item['stake'], $item['currency_id']);
+        $row = Db::getRow('SELECT 
+                b.id,
+                b.user_id,
+                b.created_at,
+                u.name as user_name,
+                /*c.code,*/
+                b.match_id,
+                b.outcome,
+                b.stake,
+                b.coefficient,
+                b.currency_id,
+                b.status,
+                b.payout
+            FROM bets as b
+            INNER JOIN users as u ON b.user_id = u.id
+            WHERE b.id = :betId
+            ORDER BY b.id DESC;
+        ', ['betId'=>$betId]);
 
-            $items[$key]['coefficient'] = ($item['coefficient'] / 100);
-            $items[$key]['payout'] = ($item['payout'] / 100);
+        if(!empty($row)) {
+            return $this->processBets($row);
         }
 
-        return $items;
+        return $row;
+    }
+
+    private function processBets(array $item) : array
+    {
+       $item['stake'] = Money::fromRaw($item['stake'], $item['currency_id']);
+
+       $item['coefficient'] = ($item['coefficient'] / 100);
+       $item['payout'] = ($item['payout'] / 100);
+
+        return $item;
     }
 }
