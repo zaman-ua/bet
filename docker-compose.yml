@@ -1,0 +1,89 @@
+version: "3.7"
+services:
+    app:
+        build:
+            args:
+                user: sammy
+                uid: 1000
+            context: ./
+            dockerfile: Dockerfile
+        image: bet
+        container_name: bet-app
+        restart: unless-stopped
+        working_dir: /var/www/html/
+        volumes:
+            - ./:/var/www/html/
+            - ./.env.example:/var/www/html/.env
+            - seedflags:/var/docker-flags
+        networks:
+            - bet
+        depends_on:
+            db:
+                condition: service_healthy
+        command: >
+            sh -lc '
+              # каталог для маркера + права (на случай запуска не root)
+              mkdir -p /var/docker-flags && chmod 777 /var/docker-flags;
+              php vendor/bin/phinx migrate --no-interaction || true;
+              if [ ! -f /var/docker-flags/seed_done ]; then
+                php vendor/bin/phinx seed:run --no-interaction || true;
+                echo ok > /var/docker-flags/seed_done;
+              fi;
+              exec /usr/local/sbin/php-fpm -F
+            '
+
+    db:
+        image: mariadb:10.11
+        container_name: bet-db
+        restart: unless-stopped
+        environment:
+            MARIADB_DATABASE: mydb
+            MARIADB_USER: myuser
+            MARIADB_PASSWORD: secret
+            MARIADB_ROOT_PASSWORD: root
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
+        volumes:
+            - bet-dbdata:/var/lib/mysql
+        healthcheck:
+            test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot" ]
+            interval: 5s
+            timeout: 3s
+            retries: 30
+        networks:
+            - bet
+
+    phpmyadmin:
+        image: phpmyadmin:5-apache
+        ports:
+            - "8081:80"
+        environment:
+            PMA_HOST: db
+            PMA_USER: myuser
+            PMA_PASSWORD: secret
+            UPLOAD_LIMIT: 128M
+        depends_on:
+            db:
+                condition: service_healthy
+        networks:
+            - bet
+
+    nginx:
+        image: nginx:alpine
+        container_name: bet-nginx
+        restart: unless-stopped
+        ports:
+            - 8000:80
+        volumes:
+            - ./:/var/www/html/
+            - ./.docker/nginx:/etc/nginx/conf.d
+        networks:
+            - bet
+
+networks:
+    bet:
+        driver: bridge
+
+volumes:
+    bet-dbdata:
+    seedflags:
