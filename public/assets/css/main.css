@@ -272,7 +272,7 @@ h1 {
     .table-responsive tbody tr td:last-child {
         border-bottom: none;
     }
-    .table-responsive tbody td::before {
+    .table-responsive tbody td:not(.empty-label)::before {
         content: attr(data-th);
         font-weight: 600;
         flex: 0 0 45%;

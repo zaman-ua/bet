@@ -65,7 +65,7 @@
             $t.find('tbody tr').each(function () {
                 $(this).children('td').each(function (i) {
                     // не перезаписываем, если уже задано вручную
-                    if (!this.hasAttribute('data-th')) {
+                    if (!this.hasAttribute('data-th') && !$(this).hasClass('empty-label')) {
                         this.setAttribute('data-th', headers[i] ?? '');
                     }
                 });

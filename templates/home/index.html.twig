@@ -45,7 +45,7 @@
                                 {% endfor %}
                             </select>
                         </td>
-                        <td>
+                        <td class="empty-label">
                             <button class="bet btn small-btn" data-id="{{ match.id }}" data-outcome="win" data-coefficient="{{ match.odds.win }}">Победа первой команды</button>
                             <button class="bet btn small-btn" data-id="{{ match.id }}" data-outcome="draw" data-coefficient="{{ match.odds.draw }}">ничья</button>
                             <button class="bet btn small-btn" data-id="{{ match.id }}" data-outcome="loss" data-coefficient="{{ match.odds.loss }}">Победа второй команды</button>

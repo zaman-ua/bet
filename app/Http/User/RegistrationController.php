@@ -44,10 +44,12 @@ class RegistrationController extends Controller
         }
 
         // проверим на существование логин пользователя
-        $userExist = $this->userRepository->getUserIdByLogin($validated['login']);
-        if(!empty($userExist)) {
-            if(!in_array('login', array_keys($this->errors))) {
-                $this->errors['login'] = 'такой login уже существует';
+        if(!empty($validated['login'])) {
+            $userExist = $this->userRepository->getUserIdByLogin($validated['login']);
+            if(!empty($userExist)) {
+                if(!in_array('login', array_keys($this->errors))) {
+                    $this->errors['login'] = 'такой login уже существует';
+                }
             }
         }
 

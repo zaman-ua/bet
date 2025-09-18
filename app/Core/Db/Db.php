@@ -3,6 +3,7 @@
 namespace App\Core\Db;
 
 use App\Exception\ConfigurationException;
+use Throwable;
 
 // для реализации подключения к базе применим паттерн статического сервиса/фасада подобие синглтона, для удобства использования,
 // а для того что бы показать что умеем подменять зависимости - делаем его универсальным под несколько провайдеров
@@ -21,23 +22,63 @@ final class Db
 
     public static function execute(string $sql, ?array $bind = null) : int
     {
-        return self::provider()->execute($sql, $bind);
+        try {
+            return self::provider()->execute($sql, $bind);
+        } catch (Throwable $e) {
+            if(env('APP_DEBUG') === true) {
+                throw $e;
+            } else {
+                return 0;
+            }
+        }
     }
     public static function getOne(string $sql, ?array $bind = null): mixed
     {
-        return self::provider()->getOne($sql, $bind);
+        try {
+            return self::provider()->getOne($sql, $bind);
+        } catch (Throwable $e) {
+            if(env('APP_DEBUG') === true) {
+                throw $e;
+            } else {
+                return null;
+            }
+        }
     }
     public static function getRow(string $sql, ?array $bind = null): ?array
     {
-        return self::provider()->getRow($sql, $bind);
+        try {
+            return self::provider()->getRow($sql, $bind);
+        } catch (Throwable $e) {
+            if(env('APP_DEBUG') === true) {
+                throw $e;
+            } else {
+                return null;
+            }
+        }
     }
-    public static function getAll(string $sql, ?array $bind = null): array
+    public static function getAll(string $sql, ?array $bind = null): ?array
     {
-        return self::provider()->getAll($sql, $bind);
+        try {
+            return self::provider()->getAll($sql, $bind);
+        } catch (Throwable $e) {
+            if(env('APP_DEBUG') === true) {
+                throw $e;
+            } else {
+                return null;
+            }
+        }
     }
-    public static function getAssoc(string $sql, ?array $bind = null): array
+    public static function getAssoc(string $sql, ?array $bind = null): ?array
     {
-        return self::provider()->getAssoc($sql, $bind);
+        try {
+            return self::provider()->getAssoc($sql, $bind);
+        } catch (Throwable $e) {
+            if(env('APP_DEBUG') === true) {
+                throw $e;
+            } else {
+                return null;
+            }
+        }
     }
 
     public static function begin(): void
