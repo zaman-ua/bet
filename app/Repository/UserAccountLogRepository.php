@@ -5,8 +5,9 @@ namespace App\Repository;
 use App\Core\Db\Db;
 use App\Domain\Money;
 use App\DTO\UserAmountLogCreateDTO;
+use App\Interface\UserAccountLogRepositoryInterface;
 
-final class UserAccountLogRepository
+final class UserAccountLogRepository implements UserAccountLogRepositoryInterface
 {
     //      'admin_adjust','bet_place','bet_win',
     //

@@ -5,8 +5,9 @@ namespace App\Repository;
 use App\Core\Db\Db;
 use App\Domain\Money;
 use App\DTO\BetCreateDTO;
+use App\Interface\BetRepositoryInterface;
 
-final class BetRepository
+final class BetRepository implements BetRepositoryInterface
 {
     public function createBet(BetCreateDTO $dto): int
     {

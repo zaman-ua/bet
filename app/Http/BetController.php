@@ -7,6 +7,8 @@ use App\Core\Http\Response;
 use App\DTO\BetCreateDTO;
 use App\Enums\OutcomeEnum;
 use App\Repository\BetRepository;
+use App\Repository\UserAccountLogRepository;
+use App\Repository\UserAmountRepository;
 use App\Repository\UserRepository;
 use App\Services\BettingService;
 use App\Validation\CreateBetValidator;
@@ -37,7 +39,14 @@ final class BetController extends Controller
             CreateBetValidator::outcome($outcome);
             $outcomeEnumVal = OutcomeEnum::from($outcome); // получится ли такой фокус? если да то полезная штука
 
-            $betId = (new BettingService())->place(new BetCreateDTO(
+            $betRepository = new BetRepository();
+            $bettingService = new BettingService(
+                new UserAmountRepository(),
+                $betRepository,
+                new UserAccountLogRepository(),
+            );
+
+            $betId = $bettingService->place(new BetCreateDTO(
                 userId: $userId,
                 currencyId: $currencyId,
                 matchId: $matchId,
@@ -52,9 +61,9 @@ final class BetController extends Controller
                 'amounts_array' => $amountArray
             ]);
 
-            $bets = (new BetRepository())->fetchBetsByUserId($userId);
+            $bets = $betRepository->fetchBetsByUserId($userId);
             $matches = require APP_ROOT . '/config/matches.php';
-            $bets = (new BetRepository())->processMatches($bets ?? [], $matches);
+            $bets = $betRepository->processMatches($bets ?? [], $matches);
 
             $betsTable = $this->fetch('shared/user_bets.html.twig', [
                 'bets' => $bets

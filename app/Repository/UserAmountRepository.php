@@ -3,8 +3,9 @@
 namespace App\Repository;
 
 use App\Core\Db\Db;
+use App\Interface\UserAmountRepositoryInterface;
 
-final class UserAmountRepository
+final class UserAmountRepository implements UserAmountRepositoryInterface
 {
     public function lockGet(int $userId, int $currencyId): ?array
     {
