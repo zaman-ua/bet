@@ -4,7 +4,7 @@ namespace App\Http\Admin;
 
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
-use App\Core\Service\AuthService;
+use App\Core\Interface\AuthServiceInterface;
 use App\Domain\MoneyFactory;
 use App\Http\Controller;
 use App\Interface\CurrencyRepositoryInterface;
@@ -23,7 +23,7 @@ final class UsersController extends Controller
         private readonly CurrencyRepositoryInterface $currencyRepository,
         private readonly UserRepositoryInterface $userRepository,
         private readonly MoneyFactory $moneyFactory,
-        AuthService $authService,
+        AuthServiceInterface $authService,
     ) {
         parent::__construct($request, $response, $authService);
     }

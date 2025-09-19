@@ -4,7 +4,7 @@ namespace App\Http;
 
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
-use App\Core\Service\AuthService;
+use App\Core\Interface\AuthServiceInterface;
 
 
 abstract class Controller
@@ -17,7 +17,7 @@ abstract class Controller
     public function __construct(
         public RequestInterface $request,
         public ResponseInterface $response,
-        protected AuthService $authService
+        protected AuthServiceInterface $authService
     ) {
         $this->oldData = $this->request->getPost() ?? [];
     }

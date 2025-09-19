@@ -4,7 +4,7 @@ namespace App\Http\Admin;
 
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
-use App\Core\Service\AuthService;
+use App\Core\Interface\AuthServiceInterface;
 use App\Http\Controller;
 use App\Interface\BetRepositoryInterface;
 use App\Services\BetPlayService;
@@ -20,7 +20,7 @@ final class BetsController extends Controller
         ResponseInterface $response,
         private readonly BetPlayService $betPlayService,
         private readonly BetRepositoryInterface $betRepository,
-        AuthService $authService,
+        AuthServiceInterface $authService,
     ) {
         parent::__construct($request, $response, $authService);
     }

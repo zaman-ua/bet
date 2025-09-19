@@ -4,7 +4,7 @@ namespace App\Http;
 
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
-use App\Core\Service\AuthService;
+use App\Core\Interface\AuthServiceInterface;
 use App\Domain\MoneyFactory;
 use App\DTO\BetCreateDTO;
 use App\Enums\OutcomeEnum;
@@ -25,7 +25,7 @@ final class BetController extends Controller
         private readonly BetRepositoryInterface $betRepository,
         private readonly UserRepositoryInterface $userRepository,
         private readonly MoneyFactory $moneyFactory,
-        AuthService $authService,
+        AuthServiceInterface $authService,
     ) {
         parent::__construct($request, $response, $authService);
     }

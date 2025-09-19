@@ -4,7 +4,7 @@ namespace App\Http;
 
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
-use App\Core\Service\AuthService;
+use App\Core\Interface\AuthServiceInterface;
 use App\Interface\BetRepositoryInterface;
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\UserRepositoryInterface;
@@ -20,7 +20,7 @@ final class HomeController extends Controller
         private readonly CurrencyRepositoryInterface $currencyRepository,
         private readonly BetRepositoryInterface $betRepository,
         private readonly UserRepositoryInterface $userRepository,
-        AuthService $authService,
+        AuthServiceInterface $authService,
     ) {
         parent::__construct($request, $response, $authService);
     }

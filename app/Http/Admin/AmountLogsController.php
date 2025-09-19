@@ -4,7 +4,7 @@ namespace App\Http\Admin;
 
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
-use App\Core\Service\AuthService;
+use App\Core\Interface\AuthServiceInterface;
 use App\Http\Controller;
 use App\Interface\UserAccountLogRepositoryInterface;
 use App\Traits\WithTwigTrait;
@@ -17,7 +17,7 @@ final class AmountLogsController extends Controller
         RequestInterface $request,
         ResponseInterface $response,
         private readonly UserAccountLogRepositoryInterface $userAccountLogRepository,
-        AuthService $authService,
+        AuthServiceInterface $authService,
     ) {
         parent::__construct($request, $response, $authService);
     }

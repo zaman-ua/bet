@@ -4,7 +4,7 @@ namespace App\Http\User;
 
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
-use App\Core\Service\AuthService;
+use App\Core\Interface\AuthServiceInterface;
 use App\DTO\UserCreateDTO;
 use App\Http\Controller;
 use App\Interface\UserRepositoryInterface;
@@ -19,7 +19,7 @@ class RegistrationController extends Controller
     public function __construct(
         RequestInterface $request, ResponseInterface $response,
         private readonly UserRepositoryInterface $userRepository,
-        AuthService $authService,
+        AuthServiceInterface $authService,
     ) {
         parent::__construct($request, $response, $authService);
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 // автозагрузка через composer
 use App\Core\Container;
+use App\Core\Interface\AuthServiceInterface;
 use App\Core\Service\AuthService;
 use App\Core\Service\RememberMeService;
 use App\Domain\Money;
@@ -72,13 +73,13 @@ $container->set(RememberMeService::class, static fn (): RememberMeService => new
     (string) env('APP_SECRET'),
 ));
 
-$container->set(AuthService::class, static fn (Container $container): AuthService => new AuthService(
+$container->set(AuthServiceInterface::class, static fn (Container $container): AuthServiceInterface => new AuthService(
     $container->get(UserRepositoryInterface::class),
     $container->get(RememberMeService::class),
 ));
 
 // то что переносили свыше Auth::resumeFromRememberCookie();
-$container->get(AuthService::class)->resumeFromRememberCookie();
+$container->get(AuthServiceInterface::class)->resumeFromRememberCookie();
 
 $container->set(AmountService::class, static fn (Container $container): AmountService => new AmountService(
     $container->get(UserAmountRepositoryInterface::class),

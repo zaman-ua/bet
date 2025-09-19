@@ -9,6 +9,9 @@ use Twig\Loader\FilesystemLoader;
 use Twig\TwigFunction;
 use Throwable;
 
+/**
+ * @property \App\Core\Interface\AuthServiceInterface $authService
+ */
 trait WithTwigTrait
 {
 // такие контроллеры у нас используются для выдачи html

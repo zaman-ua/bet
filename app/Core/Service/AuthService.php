@@ -2,9 +2,10 @@
 
 namespace App\Core\Service;
 
+use App\Core\Interface\AuthServiceInterface;
 use App\Interface\UserRepositoryInterface;
 
-final class AuthService
+final class AuthService implements AuthServiceInterface
 {
     private ?array $user = null;
 
