@@ -43,7 +43,7 @@ final class BetsController extends Controller
 
     public function play() : ResponseInterface
     {
-        $data = $this->request->post;
+        $data = $this->request->getPost();
 
         // валидация
         // TODO

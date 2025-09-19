@@ -37,10 +37,10 @@ final class Router
     // проверка соответствия маршруту
     public function match(RequestInterface $request): ?array
     {
-        $list = $this->routes[$request->method] ?? [];
+        $list = $this->routes[$request->getMethod()] ?? [];
 
         foreach ($list as $route) {
-            if (preg_match($route['regex'], $request->path, $match)) {
+            if (preg_match($route['regex'], $request->getPath(), $match)) {
                 $params = [];
                 foreach ($route['vars'] as $value) {
                     $params[$value] = $match[$value];

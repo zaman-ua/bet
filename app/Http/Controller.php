@@ -14,7 +14,7 @@ abstract class Controller
     // применим фишки php8 с автоматическим созданием атрибута
     // через указание в параметрах конструктора
     public function __construct(public RequestInterface $request, public ResponseInterface $response) {
-        $this->oldData = $this->request->post ?? [];
+        $this->oldData = $this->request->getPost() ?? [];
     }
 
     public function html(string $body = '', int $code = 200) : ResponseInterface

@@ -27,7 +27,7 @@ class RegistrationController extends Controller
     public function register() : ResponseInterface
     {
         // общая валидация
-        $validated = $this->validate($this->request->post['data'], [
+        $validated = $this->validate($this->request->getPost()['data'], [
             'login'             => ['required', 'string', 'min:3', 'max:50'],
             'password'          => ['required', 'string', 'min:8'],
             'retype_password'   => ['required', 'string', 'min:8'],
@@ -78,8 +78,8 @@ class RegistrationController extends Controller
 
             // вставляем контакты в отдельную табличку
             // без валидации данных это все очень плохо
-            if(!empty($this->request->post['contacts'])) {
-                foreach($this->request->post['contacts'] as $contact) {
+            if(!empty($this->request->getPost()['contacts'])) {
+                foreach($this->request->getPost()['contacts'] as $contact) {
                     $this->userRepository->createUserContact(
                         $userId,
                         $contact['type'],

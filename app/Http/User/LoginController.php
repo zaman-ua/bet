@@ -24,7 +24,7 @@ class LoginController extends Controller
     public function login() : ResponseInterface
     {
         // общая валидация
-        $validated = $this->validate($this->request->post['data'], [
+        $validated = $this->validate($this->request->getPost()['data'], [
             'login'             => ['required', 'string', 'min:3', 'max:50'],
             'password'          => ['required', 'string', 'min:8'],
             'remember_me'       => ['required', 'boolean'],

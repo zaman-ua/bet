@@ -8,14 +8,14 @@ final class Request implements RequestInterface
 {
     // соберем все что есть из глобальных переменных
     public function __construct(
-        public string $method,
-        public string $uri,
-        public string $path,
-        public array $query,
-        public array $post,
-        public array $files,
-        public array $cookies,
-        public array $headers,
+        private string $method,
+        private string $uri,
+        private string $path,
+        private array $query,
+        private array $post,
+        private array $files,
+        private array $cookies,
+        private array $headers,
         private array $attributes = []
     ) {}
 
@@ -56,5 +56,38 @@ final class Request implements RequestInterface
         $contentType = $this->headers['Content-Type'] ?? '';
         $xRequestWith = $this->headers['X-Requested-With'] ?? '';
         return str_contains($accept, 'application/json') || str_contains($contentType, 'application/json') || $xRequestWith === 'XMLHttpRequest';
+    }
+
+    public function getMethod(): string
+    {
+        return $this->method;
+    }
+    public function getUri(): string
+    {
+        return $this->uri;
+    }
+    public function getPath(): string
+    {
+        return $this->path;
+    }
+    public function getQuery(): array
+    {
+        return $this->query;
+    }
+    public function getPost(): array
+    {
+        return $this->post;
+    }
+    public function getFiles(): array
+    {
+        return $this->files;
+    }
+    public function getCookies(): array
+    {
+        return $this->cookies;
+    }
+    public function getHeaders(): array
+    {
+        return $this->headers;
     }
 }

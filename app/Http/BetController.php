@@ -38,7 +38,7 @@ final class BetController extends Controller
         try {
             $config = require APP_ROOT . '/config/bets.php';
 
-            $data = $this->request->post;
+            $data = $this->request->getPost();
 
             $userId         = Auth::getUserId();
             $currencyId     = (int)($data['currency_id'] ?? '');

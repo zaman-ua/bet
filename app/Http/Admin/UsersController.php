@@ -44,7 +44,7 @@ final class UsersController extends Controller
 
     public function adjust() : ResponseInterface
     {
-        $data = $this->request->post;
+        $data = $this->request->getPost();
         $amountsHtml = '';
 
         if(empty($data['currency']) || empty($data['user_id'])) {

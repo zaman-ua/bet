@@ -9,4 +9,13 @@ interface RequestInterface
     public function getAttribute(string $key, mixed $default = null): mixed;
 
     public function wantsJson(): bool;
+
+    public function getMethod(): string;
+    public function getUri(): string;
+    public function getPath(): string;
+    public function getQuery(): array;
+    public function getPost(): array;
+    public function getFiles(): array;
+    public function getCookies(): array;
+    public function getHeaders(): array;
 }

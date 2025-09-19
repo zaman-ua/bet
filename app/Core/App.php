@@ -39,8 +39,8 @@ final class App
         }
 
         // проверка csrf для всех POST запросов
-        if($request->method === 'POST') {
-            if (($request->post['csrf'] ?? '') !== ($_SESSION['csrf'] ?? '')) {
+        if($request->getMethod() === 'POST') {
+            if (($request->getPost()['csrf'] ?? '') !== ($_SESSION['csrf'] ?? '')) {
                 $response = $response
                     ->withHeader('Content-Type', 'text/plain; charset=utf-8')
                     ->withStatus(419)
