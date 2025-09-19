@@ -2,7 +2,7 @@
 
 namespace App\Core;
 
-use App\Core\Http\Request;
+use App\Core\Http\RequestInterface;
 use App\Core\Http\Response;
 use App\Core\Http\ResponseInterface;
 use App\Exception\ErrorHandler;
@@ -22,7 +22,7 @@ final class App
         $this->container = $this->container ?? new Container();
     }
 
-    public function handle(Request $request) : void
+    public function handle(RequestInterface $request) : void
     {
         $match = $this->router->match($request);
         $response = new Response();
@@ -85,7 +85,7 @@ final class App
         $this->emit($response);
     }
 
-    private function resolveController(string $class, Request $request, Response $response): Controller
+    private function resolveController(string $class, RequestInterface $request, ResponseInterface $response): Controller
     {
         $reflection = new ReflectionClass($class);
         $constructor = $reflection->getConstructor();
