@@ -91,6 +91,7 @@ final class App
         $constructor = $reflection->getConstructor();
 
         if ($constructor === null) {
+            /** @var Controller $controller */
             $controller = $reflection->newInstance($request, $response);
 
             return $controller;
@@ -122,6 +123,7 @@ final class App
             throw new RuntimeException("Cannot resolve dependency '{$parameter->getName()}' for controller '{$class}'");
         }
 
+        /** @var Controller $controller */
         $controller = $reflection->newInstanceArgs($arguments);
 
         return $controller;
