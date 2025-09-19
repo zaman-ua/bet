@@ -43,7 +43,9 @@ App\Core\Db\Db::configure(require APP_ROOT . '/config/database.php');
 // выносим в абстрактный контроллер для http запросов, а для api сессия не нужна
 // возможно позже сделаю лучше
 session_start();
-Auth::resumeFromRememberCookie();
+
+// переносим ниже, где уже работает контейнер
+//Auth::resumeFromRememberCookie();
 
 $container = new Container();
 
@@ -52,6 +54,9 @@ $container->set(CurrencyRepositoryInterface::class, static fn (): CurrencyReposi
 $container->set(UserAccountLogRepositoryInterface::class, static fn (): UserAccountLogRepositoryInterface => new UserAccountLogRepository());
 $container->set(UserAmountRepositoryInterface::class, static fn (): UserAmountRepositoryInterface => new UserAmountRepository());
 $container->set(UserRepositoryInterface::class, static fn (): UserRepositoryInterface => new UserRepository());
+
+Auth::setUserRepository($container->get(UserRepositoryInterface::class));
+Auth::resumeFromRememberCookie();
 
 $container->set(AmountService::class, static fn (Container $container): AmountService => new AmountService(
     $container->get(UserAmountRepositoryInterface::class),

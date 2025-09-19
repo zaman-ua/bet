@@ -2,18 +2,28 @@
 
 namespace App\Core;
 
-use App\Repository\UserRepository;
+use App\Interface\UserRepositoryInterface;
+use RuntimeException;
 
 final class Auth
 {
     private static ?array $user = null;
-    private static ?UserRepository $users = null;
+    private static ?UserRepositoryInterface $users = null;
 
     public const REMEMBER_COOKIE = 'remember';
 
-    public static function usersRepositoryInstance() : UserRepository
+    public static function setUserRepository(UserRepositoryInterface $userRepository): void
     {
-        return self::$users ?? self::$users = new UserRepository();
+        self::$users = $userRepository;
+    }
+
+    public static function usersRepositoryInstance() : UserRepositoryInterface
+    {
+        if (self::$users === null) {
+            throw new RuntimeException('User repository dependency is not set.');
+        }
+
+        return self::$users;
     }
 
     public static function isLoggedIn() : bool
