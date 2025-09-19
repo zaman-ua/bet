@@ -4,13 +4,14 @@ namespace App\Http;
 
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
+use App\Traits\WithRequestValidateTrait;
 use App\Traits\WithTwigTrait;
-use App\Validation\RequestValidator;
 
 
 abstract class Controller
 {
     use WithTwigTrait;
+    use WithRequestValidateTrait;
     protected array $oldData = [];
     public array $errors = [];
 
@@ -40,14 +41,6 @@ abstract class Controller
             ->withHeader('Content-Type', 'application/json; charset=utf-8')
             ->withStatus($code)
             ->write($body);
-    }
-
-    public function validate(array $data, array $validation) : array
-    {
-        [$result, $errors] = RequestValidator::validate($data, $validation);
-
-        $this->errors = $errors;
-        return $result;
     }
 
     public function redirect(string $url, int $code = 301) : ResponseInterface
