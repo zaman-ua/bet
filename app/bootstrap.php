@@ -7,7 +7,6 @@ use App\Core\Container;
 use App\Core\Interface\AuthServiceInterface;
 use App\Core\Service\AuthService;
 use App\Core\Service\RememberMeService;
-use App\Domain\Money;
 use App\Domain\MoneyFactory;
 use App\Interface\BetRepositoryInterface;
 use App\Interface\CurrencyRepositoryInterface;
@@ -97,7 +96,5 @@ $container->set(BettingService::class, static fn (Container $container): Betting
     $container->get(BetRepositoryInterface::class),
     $container->get(UserAccountLogRepositoryInterface::class),
 ));
-
-Money::setFactory($container->get(MoneyFactory::class));
 
 return $container;
