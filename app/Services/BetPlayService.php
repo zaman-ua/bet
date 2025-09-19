@@ -4,18 +4,18 @@ namespace App\Services;
 
 use App\Core\Db\Db;
 use App\DTO\UserAmountLogCreateDTO;
-use App\Repository\BetRepository;
-use App\Repository\UserAccountLogRepository;
-use App\Repository\UserAmountRepository;
+use App\Interface\BetRepositoryInterface;
+use App\Interface\UserAccountLogRepositoryInterface;
+use App\Interface\UserAmountRepositoryInterface;
 use RuntimeException;
 use Throwable;
 
 final class BetPlayService
 {
     public function __construct(
-        protected UserAmountRepository     $amounts = new UserAmountRepository(),
-        protected BetRepository            $bets = new BetRepository(),
-        protected UserAccountLogRepository $userAccountLogs = new UserAccountLogRepository()
+        protected UserAmountRepositoryInterface     $amounts,
+        protected BetRepositoryInterface            $bets,
+        protected UserAccountLogRepositoryInterface $userAccountLogs
     ) {}
 
     public function play(int $betId, string $result): int

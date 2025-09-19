@@ -3,12 +3,12 @@
 namespace App\Http\User;
 
 use App\Core\Auth;
-use App\Core\Http\Response;
+use App\Core\Http\ResponseInterface;
 use App\Http\Controller;
 
 class LoginController extends Controller
 {
-    public function index() : Response
+    public function index() : ResponseInterface
     {
         Auth::logoutUser();
         Auth::clearRememberCookie();
@@ -16,7 +16,7 @@ class LoginController extends Controller
         return $this->render('user/login.html.twig');
     }
 
-    public function login() : Response
+    public function login() : ResponseInterface
     {
         // общая валидация
         $validated = $this->validate($this->request->post['data'], [

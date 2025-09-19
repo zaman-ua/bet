@@ -3,24 +3,29 @@
 namespace App\Http\Admin;
 
 use App\Core\Auth;
-use App\Core\Http\Response;
-use App\Domain\Money;
+use App\Core\Http\RequestInterface;
+use App\Core\Http\ResponseInterface;
 use App\Http\Controller;
-use App\Repository\CurrencyRepository;
-use App\Repository\UserAccountLogRepository;
-use App\Repository\UserRepository;
-use App\Services\AmountService;
+use App\Interface\UserAccountLogRepositoryInterface;
 
 final class AmountLogsController extends Controller
 {
-    public function __invoke() : Response
+    public function __construct(
+        RequestInterface $request,
+        ResponseInterface $response,
+        private readonly UserAccountLogRepositoryInterface $userAccountLogRepository,
+    ) {
+        parent::__construct($request, $response);
+    }
+
+    public function __invoke() : ResponseInterface
     {
         // если пользователь зашел куда его не просили
         if(!Auth::isAdmin()) {
             return $this->redirect('/');
         }
 
-        $logs = (new UserAccountLogRepository())->fetchAll();
+        $logs = $this->userAccountLogRepository->fetchAll();
 
         return $this->render('admin/amount_logs.html.twig', [
             'logs' => $logs,

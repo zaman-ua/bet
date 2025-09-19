@@ -3,14 +3,25 @@
 namespace App\Http;
 
 use App\Core\Auth;
-use App\Core\Http\Response;
-use App\Repository\BetRepository;
-use App\Repository\CurrencyRepository;
-use App\Repository\UserRepository;
+use App\Core\Http\RequestInterface;
+use App\Core\Http\ResponseInterface;
+use App\Interface\BetRepositoryInterface;
+use App\Interface\CurrencyRepositoryInterface;
+use App\Interface\UserRepositoryInterface;
 
 final class HomeController extends Controller
 {
-    public function __invoke() : Response
+    public function __construct(
+        RequestInterface $request,
+        ResponseInterface $response,
+        private readonly CurrencyRepositoryInterface $currencyRepository,
+        private readonly BetRepositoryInterface $betRepository,
+        private readonly UserRepositoryInterface $userRepository,
+    ) {
+        parent::__construct($request, $response);
+    }
+
+    public function __invoke() : ResponseInterface
     {
         // такого не должно быть, но в жизни всякое бывает
         if(Auth::isAdmin()) {
@@ -20,15 +31,15 @@ final class HomeController extends Controller
         if(Auth::isLoggedIn()) {
             $userId = Auth::getUserId();
             if($userId) {
-                $amounts = (new UserRepository()->fetchAmountsById($userId));
-                $bets = (new BetRepository())->fetchBetsByUserId($userId);
+                $amounts = $this->userRepository->fetchAmountsById($userId);
+                $bets = $this->betRepository->fetchBetsByUserId($userId);
             }
         }
 
-        $currencies = (new CurrencyRepository()->getAssoc());
+        $currencies = $this->currencyRepository->getAssoc();
         $matches = require APP_ROOT . '/config/matches.php';
 
-        $bets = (new BetRepository())->processMatches($bets ?? [], $matches);
+        $bets = $this->betRepository->processMatches($bets ?? [], $matches);
 
         return $this->render('home/index.html.twig', [
             'matches' => $matches,

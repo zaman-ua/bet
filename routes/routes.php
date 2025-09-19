@@ -29,11 +29,11 @@ return function (Router $route): void {
     $route->add('POST', '/users/bet', [BetController::class, 'store']);
 
     // админка ставки
-    $route->add('GET', '/admin/bets', Admin\BetsController::class);
+    $route->add('GET', '/admin/bets', [Admin\BetsController::class, 'index']);
     $route->add('POST', '/admin/bets/{id:\d+}/play', [Admin\BetsController::class, 'play']);
 
     // админка пользователи
-    $route->add('GET', '/admin/users', Admin\UsersController::class);
+    $route->add('GET', '/admin/users', [Admin\UsersController::class, 'index']);
     $route->add('POST', '/admin/users/{id:\d+}/adjust', [Admin\UsersController::class, 'adjust']);
 
     // админка фин. лог

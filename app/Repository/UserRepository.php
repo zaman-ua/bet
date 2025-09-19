@@ -5,8 +5,9 @@ namespace App\Repository;
 use App\Core\Db\Db;
 use App\Domain\Money;
 use App\DTO\UserCreateDTO;
+use App\Interface\UserRepositoryInterface;
 
-final class UserRepository
+final class UserRepository implements UserRepositoryInterface
 {
     public function getUserById(int $userId, ?bool $status = null) : ?array
     {

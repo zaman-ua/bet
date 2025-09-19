@@ -4,14 +4,22 @@ namespace App\Core;
 
 use App\Core\Http\Request;
 use App\Core\Http\Response;
+use App\Core\Http\ResponseInterface;
 use App\Exception\ErrorHandler;
+use App\Http\Controller;
+use ReflectionClass;
+use ReflectionNamedType;
+use RuntimeException;
 
 final class App
 {
-    public function __construct(private ?Router $router = null)
+    public function __construct(private ?Router $router = null, private ?Container $container = null)
     {
         // инициализация роутера
         $this->router = $router ?? Router::fromFile(APP_ROOT . '/routes/routes.php');
+
+        // инициализация DI-контейнера
+        $this->container = $this->container ?? new Container();
     }
 
     public function handle(Request $request) : void
@@ -56,13 +64,13 @@ final class App
             // вызов контроллера
             if (is_string($handler)) {
                 // для инвокабл контроллера
-                $controller = new $handler($request, $response);
+                $controller = $this->resolveController($handler, $request, $response);
                 $response = $controller();
 
             } elseif (is_array($handler)) {
                 // для конкретного метода контроллера
                 [$class, $method] = [$handler[0], $handler[1]];
-                $controller = new $class($request, $response);
+                $controller = $this->resolveController($class, $request, $response);
                 $response = $controller->{$method}();
 
             }
@@ -77,7 +85,49 @@ final class App
         $this->emit($response);
     }
 
-    private function emit(Response $response): void
+    private function resolveController(string $class, Request $request, Response $response): Controller
+    {
+        $reflection = new ReflectionClass($class);
+        $constructor = $reflection->getConstructor();
+
+        if ($constructor === null) {
+            $controller = $reflection->newInstance($request, $response);
+
+            return $controller;
+        }
+
+        $parameters = $constructor->getParameters();
+
+        if (count($parameters) < 2) {
+            throw new RuntimeException("Controller '{$class}' must accept Request and Response as the first arguments");
+        }
+
+        $arguments = [$request, $response];
+
+        foreach (array_slice($parameters, 2) as $parameter) {
+            $type = $parameter->getType();
+
+            if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
+                $arguments[] = $this->container->get($type->getName());
+
+                continue;
+            }
+
+            if ($parameter->isDefaultValueAvailable()) {
+                $arguments[] = $parameter->getDefaultValue();
+
+                continue;
+            }
+
+            throw new RuntimeException("Cannot resolve dependency '{$parameter->getName()}' for controller '{$class}'");
+        }
+
+        $controller = $reflection->newInstanceArgs($arguments);
+
+        return $controller;
+    }
+
+    private function emit(ResponseInterface $response): void
     {
         // устанавливаем правильный код ответа
         http_response_code($response->status());

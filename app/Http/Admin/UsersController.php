@@ -3,24 +3,35 @@
 namespace App\Http\Admin;
 
 use App\Core\Auth;
-use App\Core\Http\Response;
+use App\Core\Http\RequestInterface;
+use App\Core\Http\ResponseInterface;
 use App\Domain\Money;
 use App\Http\Controller;
-use App\Repository\CurrencyRepository;
-use App\Repository\UserRepository;
+use App\Interface\CurrencyRepositoryInterface;
+use App\Interface\UserRepositoryInterface;
 use App\Services\AmountService;
 
 final class UsersController extends Controller
 {
-    public function __invoke() : Response
+    public function __construct(
+        RequestInterface $request,
+        ResponseInterface $response,
+        private readonly AmountService $amountService,
+        private readonly CurrencyRepositoryInterface $currencyRepository,
+        private readonly UserRepositoryInterface $userRepository,
+    ) {
+        parent::__construct($request, $response);
+    }
+
+    public function index() : ResponseInterface
     {
         // если пользователь зашел куда его не просили
         if(!Auth::isAdmin()) {
             return $this->redirect('/');
         }
 
-        $users = (new UserRepository())->fetchAll();
-        $currencies = (new CurrencyRepository())->getAssoc();
+        $users = $this->userRepository->fetchAll();
+        $currencies = $this->currencyRepository->getAssoc();
 
         return $this->render('admin/users.html.twig', [
             'users' => $users,
@@ -28,7 +39,7 @@ final class UsersController extends Controller
         ]);
     }
 
-    public function adjust() : Response
+    public function adjust() : ResponseInterface
     {
         $data = $this->request->post;
         $amountsHtml = '';
@@ -47,7 +58,7 @@ final class UsersController extends Controller
 
                 $money = Money::fromHuman($amount, $currencyId);
 
-                (new AmountService())->adjust(
+                $this->amountService->adjust(
                     $data['user_id'],
                     $currencyId,
                     $money->amount,
@@ -56,7 +67,7 @@ final class UsersController extends Controller
             }
         }
 
-        $amountArray = (new UserRepository())->fetchAmountsById($data['user_id']);
+        $amountArray = $this->userRepository->fetchAmountsById($data['user_id']);
 
         $amountsHtml = $this->fetch('shared/user_amounts.html.twig', [
             'amounts_array' => $amountArray

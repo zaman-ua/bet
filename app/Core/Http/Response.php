@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\Http;
 
-final class Response
+final class Response implements ResponseInterface
 {
     private int $status = 200;
     private array $headers = ['Content-Type' => 'text/html; charset=utf-8'];

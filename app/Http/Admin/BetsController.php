@@ -3,34 +3,42 @@
 namespace App\Http\Admin;
 
 use App\Core\Auth;
-use App\Core\Http\Response;
+use App\Core\Http\RequestInterface;
+use App\Core\Http\ResponseInterface;
 use App\Http\Controller;
-use App\Repository\BetRepository;
+use App\Interface\BetRepositoryInterface;
 use App\Services\BetPlayService;
 use RuntimeException;
 
 final class BetsController extends Controller
 {
-    public function __invoke() : Response
+    public function __construct(
+        RequestInterface $request,
+        ResponseInterface $response,
+        private readonly BetPlayService $betPlayService,
+        private readonly BetRepositoryInterface $betRepository,
+    ) {
+        parent::__construct($request, $response);
+    }
+
+    public function index() : ResponseInterface
     {
         // если пользователь зашел куда его не просили
         if(!Auth::isAdmin()) {
             return $this->redirect('/');
         }
 
-        $betsRepository = new BetRepository();
-
-        $bets = $betsRepository->fetchAll();
+        $bets = $this->betRepository->fetchAll();
         $matches = require APP_ROOT . '/config/matches.php';
 
-        $bets = $betsRepository->processMatches($bets, $matches);
+        $bets = $this->betRepository->processMatches($bets, $matches);
 
         return $this->render('admin/bets.html.twig', [
             'bets' => $bets,
         ]);
     }
 
-    public function play() : Response
+    public function play() : ResponseInterface
     {
         $data = $this->request->post;
 
@@ -42,8 +50,8 @@ final class BetsController extends Controller
             throw new RuntimeException('wrong result');
         }
 
-        $betId = (new BetPlayService())->play($data['bet_id'], $data['result']);
-        $bet = (new BetRepository())->getById($betId);
+        $betId = $this->betPlayService->play($data['bet_id'], $data['result']);
+        $bet = $this->betRepository->getById($betId);
 
         return $this->json([
             'ok' => true,

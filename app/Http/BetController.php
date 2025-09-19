@@ -3,19 +3,28 @@
 namespace App\Http;
 
 use App\Core\Auth;
-use App\Core\Http\Response;
+use App\Core\Http\RequestInterface;
+use App\Core\Http\ResponseInterface;
 use App\DTO\BetCreateDTO;
 use App\Enums\OutcomeEnum;
-use App\Repository\BetRepository;
-use App\Repository\UserAccountLogRepository;
-use App\Repository\UserAmountRepository;
-use App\Repository\UserRepository;
+use App\Interface\BetRepositoryInterface;
+use App\Interface\UserRepositoryInterface;
 use App\Services\BettingService;
 use App\Validation\CreateBetValidator;
 
 final class BetController extends Controller
 {
-    public function store(): Response
+    public function __construct(
+        RequestInterface $request,
+        ResponseInterface $response,
+        private readonly BettingService $bettingService,
+        private readonly BetRepositoryInterface $betRepository,
+        private readonly UserRepositoryInterface $userRepository,
+    ) {
+        parent::__construct($request, $response);
+    }
+
+    public function store(): ResponseInterface
     {
         if(!Auth::isLoggedIn()) {
             return $this->json([
@@ -39,14 +48,7 @@ final class BetController extends Controller
             CreateBetValidator::outcome($outcome);
             $outcomeEnumVal = OutcomeEnum::from($outcome); // получится ли такой фокус? если да то полезная штука
 
-            $betRepository = new BetRepository();
-            $bettingService = new BettingService(
-                new UserAmountRepository(),
-                $betRepository,
-                new UserAccountLogRepository(),
-            );
-
-            $betId = $bettingService->place(new BetCreateDTO(
+            $betId = $this->bettingService->place(new BetCreateDTO(
                 userId: $userId,
                 currencyId: $currencyId,
                 matchId: $matchId,
@@ -56,14 +58,14 @@ final class BetController extends Controller
             ));
 
             // обновляем баланс пользователя так же как и в админке
-            $amountArray = (new UserRepository())->fetchAmountsById(Auth::getUserId());
+            $amountArray = $this->userRepository->fetchAmountsById(Auth::getUserId());
             $amountsHtml = $this->fetch('shared/user_amounts.html.twig', [
                 'amounts_array' => $amountArray
             ]);
 
-            $bets = $betRepository->fetchBetsByUserId($userId);
+            $bets = $this->betRepository->fetchBetsByUserId($userId);
             $matches = require APP_ROOT . '/config/matches.php';
-            $bets = $betRepository->processMatches($bets ?? [], $matches);
+            $bets = $this->betRepository->processMatches($bets ?? [], $matches);
 
             $betsTable = $this->fetch('shared/user_bets.html.twig', [
                 'bets' => $bets

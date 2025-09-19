@@ -4,6 +4,20 @@ declare(strict_types=1);
 
 // автозагрузка через composer
 use App\Core\Auth;
+use App\Core\Container;
+use App\Interface\BetRepositoryInterface;
+use App\Interface\CurrencyRepositoryInterface;
+use App\Interface\UserAccountLogRepositoryInterface;
+use App\Interface\UserAmountRepositoryInterface;
+use App\Interface\UserRepositoryInterface;
+use App\Repository\BetRepository;
+use App\Repository\CurrencyRepository;
+use App\Repository\UserAccountLogRepository;
+use App\Repository\UserAmountRepository;
+use App\Repository\UserRepository;
+use App\Services\AmountService;
+use App\Services\BetPlayService;
+use App\Services\BettingService;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -30,3 +44,30 @@ App\Core\Db\Db::configure(require APP_ROOT . '/config/database.php');
 // возможно позже сделаю лучше
 session_start();
 Auth::resumeFromRememberCookie();
+
+$container = new Container();
+
+$container->set(BetRepositoryInterface::class, static fn (): BetRepositoryInterface => new BetRepository());
+$container->set(CurrencyRepositoryInterface::class, static fn (): CurrencyRepositoryInterface => new CurrencyRepository());
+$container->set(UserAccountLogRepositoryInterface::class, static fn (): UserAccountLogRepositoryInterface => new UserAccountLogRepository());
+$container->set(UserAmountRepositoryInterface::class, static fn (): UserAmountRepositoryInterface => new UserAmountRepository());
+$container->set(UserRepositoryInterface::class, static fn (): UserRepositoryInterface => new UserRepository());
+
+$container->set(AmountService::class, static fn (Container $container): AmountService => new AmountService(
+    $container->get(UserAmountRepositoryInterface::class),
+    $container->get(UserAccountLogRepositoryInterface::class),
+));
+
+$container->set(BetPlayService::class, static fn (Container $container): BetPlayService => new BetPlayService(
+    $container->get(UserAmountRepositoryInterface::class),
+    $container->get(BetRepositoryInterface::class),
+    $container->get(UserAccountLogRepositoryInterface::class),
+));
+
+$container->set(BettingService::class, static fn (Container $container): BettingService => new BettingService(
+    $container->get(UserAmountRepositoryInterface::class),
+    $container->get(BetRepositoryInterface::class),
+    $container->get(UserAccountLogRepositoryInterface::class),
+));
+
+return $container;

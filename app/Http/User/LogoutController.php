@@ -3,12 +3,12 @@
 namespace App\Http\User;
 
 use App\Core\Auth;
-use App\Core\Http\Response;
+use App\Core\Http\ResponseInterface;
 use App\Http\Controller;
 
 class LogoutController extends Controller
 {
-    public function index() : Response
+    public function index() : ResponseInterface
     {
         Auth::clearRememberCookie();
         Auth::logoutUser();

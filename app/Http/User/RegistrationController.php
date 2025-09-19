@@ -3,27 +3,24 @@
 namespace App\Http\User;
 
 use App\Core\Auth;
-use App\Core\Http\Request;
-use App\Core\Http\Response;
+use App\Core\Http\RequestInterface;
+use App\Core\Http\ResponseInterface;
 use App\DTO\UserCreateDTO;
 use App\Http\Controller;
-use App\Repository\UserRepository;
+use App\Interface\UserRepositoryInterface;
 
 class RegistrationController extends Controller
 {
-    private UserRepository $userRepository;
 
-    public function __construct(Request $request, Response $response) {
-        $this->userRepository = new UserRepository();
-
+    public function __construct(RequestInterface $request, ResponseInterface $response, private readonly UserRepositoryInterface $userRepository) {
         parent::__construct($request, $response);
     }
-    public function index() : Response
+    public function index() : ResponseInterface
     {
         return $this->render('user/registration.html.twig');
     }
 
-    public function register() : Response
+    public function register() : ResponseInterface
     {
         // общая валидация
         $validated = $this->validate($this->request->post['data'], [

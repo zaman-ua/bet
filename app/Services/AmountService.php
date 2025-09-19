@@ -4,15 +4,15 @@ namespace App\Services;
 
 use App\Core\Db\Db;
 use App\DTO\UserAmountLogCreateDTO;
-use App\Repository\UserAccountLogRepository;
-use App\Repository\UserAmountRepository;
+use App\Interface\UserAccountLogRepositoryInterface;
+use App\Interface\UserAmountRepositoryInterface;
 use Throwable;
 
 final class AmountService
 {
     public function __construct(
-        private UserAmountRepository     $amounts = new UserAmountRepository(),
-        private UserAccountLogRepository $userAccountLogs = new UserAccountLogRepository()
+        private UserAmountRepositoryInterface     $amounts,
+        private UserAccountLogRepositoryInterface $userAccountLogs
     ) {}
 
     public function adjust(int $userId, int $currencyId, int $amount, string $comment = ''): void

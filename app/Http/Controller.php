@@ -2,8 +2,8 @@
 
 namespace App\Http;
 
-use App\Core\Http\Request;
-use App\Core\Http\Response;
+use App\Core\Http\RequestInterface;
+use App\Core\Http\ResponseInterface;
 use App\Exception\TwigRenderException;
 use App\Validation\RequestValidator;
 use Twig\Environment;
@@ -18,10 +18,10 @@ abstract class Controller
 
     // применим фишки php8 с автоматическим созданием атрибута
     // через указание в параметрах конструктора
-    public function __construct(public Request $request, public Response $response) {
+    public function __construct(public RequestInterface $request, public ResponseInterface $response) {
         $this->oldData = $this->request->post ?? [];
     }
-    public function json(array $payload = [], int $code = 200) : Response
+    public function json(array $payload = [], int $code = 200) : ResponseInterface
     {
         // сделаем вывод json красивым в Chrome браузере
         $body = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
@@ -44,7 +44,7 @@ abstract class Controller
     // по этому здесь и подключаем шаблонизатор
     // сразу же формируем респонс с правильным кодом ответа
     // в контроллере в конце нужно будет только вызвать render() с указанием шаблона и передать переменные шаблона
-    public function render(string $template, array $vars = [], int $code = 200) : Response
+    public function render(string $template, array $vars = [], int $code = 200) : ResponseInterface
     {
         try {
             // подмешиваем ошибки валидации и старые данные что бы можно было отобразить в форме
@@ -82,7 +82,7 @@ abstract class Controller
         }
     }
 
-    public function redirect(string $url, int $code = 301) : Response
+    public function redirect(string $url, int $code = 301) : ResponseInterface
     {
         return $this->response
             ->withHeader('HTTP/1.1 301 Moved Permanently','')

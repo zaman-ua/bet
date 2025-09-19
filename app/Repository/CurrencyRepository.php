@@ -3,8 +3,9 @@
 namespace App\Repository;
 
 use App\Core\Db\Db;
+use App\Interface\CurrencyRepositoryInterface;
 
-final class CurrencyRepository
+final class CurrencyRepository implements CurrencyRepositoryInterface
 {
     public function getAssoc() : ?array
     {
