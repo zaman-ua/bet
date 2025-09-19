@@ -5,7 +5,7 @@ namespace App\Http\Admin;
 use App\Core\Auth;
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
-use App\Domain\Money;
+use App\Domain\MoneyFactory;
 use App\Http\Controller;
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\UserRepositoryInterface;
@@ -22,6 +22,7 @@ final class UsersController extends Controller
         private readonly AmountService $amountService,
         private readonly CurrencyRepositoryInterface $currencyRepository,
         private readonly UserRepositoryInterface $userRepository,
+        private readonly MoneyFactory $moneyFactory,
     ) {
         parent::__construct($request, $response);
     }
@@ -59,13 +60,13 @@ final class UsersController extends Controller
                 // валидируем наличие пользователя, валюты, сумму
                 // TODO
 
-                $money = Money::fromHuman($amount, $currencyId);
+                $money = $this->moneyFactory->fromHuman($amount, $currencyId);
 
                 $this->amountService->adjust(
-                    $data['user_id'],
-                    $currencyId,
-                    $money->amount,
-                    'изменено администратором'
+                    userId: $data['user_id'],
+                    currencyId: $currencyId,
+                    amount: $money->amount,
+                    comment: 'изменено администратором'
                 );
             }
         }

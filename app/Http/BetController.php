@@ -5,6 +5,7 @@ namespace App\Http;
 use App\Core\Auth;
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
+use App\Domain\MoneyFactory;
 use App\DTO\BetCreateDTO;
 use App\Enums\OutcomeEnum;
 use App\Interface\BetRepositoryInterface;
@@ -23,6 +24,7 @@ final class BetController extends Controller
         private readonly BettingService $bettingService,
         private readonly BetRepositoryInterface $betRepository,
         private readonly UserRepositoryInterface $userRepository,
+        private readonly MoneyFactory $moneyFactory,
     ) {
         parent::__construct($request, $response);
     }
@@ -45,7 +47,7 @@ final class BetController extends Controller
             $matchId        = (string)($data['match_id'] ?? '');
             $outcome        = (string)($data['outcome'] ?? '');
             $coefficient    = CreateBetValidator::coefficientValidate((string)($data['coefficient'] ?? ''), $config);
-            $stake          = CreateBetValidator::stakeValidate((string)($data['stake'] ?? ''), $currencyId, $config);
+            $stake          = CreateBetValidator::stakeValidate((string)($data['stake'] ?? ''), $currencyId, $config, $this->moneyFactory);
 
             // валидируем значение для enum
             CreateBetValidator::outcome($outcome);

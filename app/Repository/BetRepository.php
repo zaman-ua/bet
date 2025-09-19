@@ -3,12 +3,17 @@
 namespace App\Repository;
 
 use App\Core\Db\Db;
-use App\Domain\Money;
+use App\Domain\MoneyFactory;
 use App\DTO\BetCreateDTO;
 use App\Interface\BetRepositoryInterface;
 
 final class BetRepository implements BetRepositoryInterface
 {
+    public function __construct(
+        private readonly MoneyFactory $moneyFactory,
+    ) {
+    }
+
     public function createBet(BetCreateDTO $dto): int
     {
         Db::execute(
@@ -142,7 +147,7 @@ final class BetRepository implements BetRepositoryInterface
 
     private function processBets(array $item) : array
     {
-       $item['stake'] = Money::fromRaw($item['stake'], $item['currency_id']);
+       $item['stake'] = $this->moneyFactory->fromRaw($item['stake'], $item['currency_id']);
 
        $item['coefficient'] = ($item['coefficient'] / 100);
        $item['payout'] = ($item['payout'] / 100);

@@ -3,12 +3,17 @@
 namespace App\Repository;
 
 use App\Core\Db\Db;
-use App\Domain\Money;
+use App\Domain\MoneyFactory;
 use App\DTO\UserAmountLogCreateDTO;
 use App\Interface\UserAccountLogRepositoryInterface;
 
 final class UserAccountLogRepository implements UserAccountLogRepositoryInterface
 {
+    public function __construct(
+        private readonly MoneyFactory $moneyFactory,
+    ) {
+    }
+
     //      'admin_adjust','bet_place','bet_win',
     //
     //  эти статусы пока остануться без реализации: 'deposit','withdraw','refund'
@@ -72,7 +77,7 @@ final class UserAccountLogRepository implements UserAccountLogRepositoryInterfac
     private function processBets($items) : array
     {
         foreach ($items as $key => $item) {
-            $items[$key]['amount'] = Money::fromRaw($item['amount'], $item['currency_id']);
+            $items[$key]['amount'] = $this->moneyFactory->fromRaw($item['amount'], $item['currency_id']);
         }
 
         return $items;

@@ -5,6 +5,8 @@ declare(strict_types=1);
 // автозагрузка через composer
 use App\Core\Auth;
 use App\Core\Container;
+use App\Domain\Money;
+use App\Domain\MoneyFactory;
 use App\Interface\BetRepositoryInterface;
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\UserAccountLogRepositoryInterface;
@@ -49,11 +51,21 @@ session_start();
 
 $container = new Container();
 
-$container->set(BetRepositoryInterface::class, static fn (): BetRepositoryInterface => new BetRepository());
+$container->set(MoneyFactory::class, static fn (Container $container): MoneyFactory => new MoneyFactory(
+    $container->get(CurrencyRepositoryInterface::class),
+));
+
+$container->set(BetRepositoryInterface::class, static fn (): BetRepositoryInterface => new BetRepository(
+    $container->get(MoneyFactory::class),
+));
 $container->set(CurrencyRepositoryInterface::class, static fn (): CurrencyRepositoryInterface => new CurrencyRepository());
-$container->set(UserAccountLogRepositoryInterface::class, static fn (): UserAccountLogRepositoryInterface => new UserAccountLogRepository());
+$container->set(UserAccountLogRepositoryInterface::class, static fn (): UserAccountLogRepositoryInterface => new UserAccountLogRepository(
+    $container->get(MoneyFactory::class),
+));
 $container->set(UserAmountRepositoryInterface::class, static fn (): UserAmountRepositoryInterface => new UserAmountRepository());
-$container->set(UserRepositoryInterface::class, static fn (): UserRepositoryInterface => new UserRepository());
+$container->set(UserRepositoryInterface::class, static fn (): UserRepositoryInterface => new UserRepository(
+    $container->get(MoneyFactory::class),
+));
 
 Auth::setUserRepository($container->get(UserRepositoryInterface::class));
 Auth::resumeFromRememberCookie();
@@ -74,5 +86,7 @@ $container->set(BettingService::class, static fn (Container $container): Betting
     $container->get(BetRepositoryInterface::class),
     $container->get(UserAccountLogRepositoryInterface::class),
 ));
+
+Money::setFactory($container->get(MoneyFactory::class));
 
 return $container;

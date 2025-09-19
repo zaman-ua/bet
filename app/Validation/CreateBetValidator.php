@@ -2,7 +2,7 @@
 
 namespace App\Validation;
 
-use App\Domain\Money;
+use App\Domain\MoneyFactory;
 use App\Enums\OutcomeEnum;
 
 final class CreateBetValidator
@@ -36,9 +36,9 @@ final class CreateBetValidator
         return $result;
     }
 
-    public static function stakeValidate(string $amount, int $currencyId, array $config): int
+    public static function stakeValidate(string $amount, int $currencyId, array $config, MoneyFactory $moneyFactory): int
     {
-        $money = Money::fromHuman($amount, $currencyId);
+        $money = $moneyFactory->fromHuman($amount, $currencyId);
 
         if ($money->amount < $config['min_bet'] || $money->amount > $config['max_bet']) {
             throw new \InvalidArgumentException('Stake must be within '.($config['min_bet'] / 100).'..'.($config['max_bet'] / 100) );

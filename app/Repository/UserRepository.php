@@ -3,12 +3,17 @@
 namespace App\Repository;
 
 use App\Core\Db\Db;
-use App\Domain\Money;
+use App\Domain\MoneyFactory;
 use App\DTO\UserCreateDTO;
 use App\Interface\UserRepositoryInterface;
 
 final class UserRepository implements UserRepositoryInterface
 {
+    public function __construct(
+        private readonly MoneyFactory $moneyFactory,
+    ) {
+    }
+
     public function getUserById(int $userId, ?bool $status = null) : ?array
     {
         $sql = 'SELECT id, login, name, gender, birth_date, status, is_admin FROM `users` WHERE `id` = :userId ';
@@ -136,7 +141,7 @@ final class UserRepository implements UserRepositoryInterface
         if(!empty($amounts)) {
             foreach ($amounts as $amount) {
                 [$amountRaw, $currencyCode] = explode(' ', $amount);
-                $money = Money::fromRaw($amountRaw, null, $currencyCode);
+                $money = $this->moneyFactory->fromRaw($amountRaw, null, $currencyCode);
 
                 $result[] = $money;
             }
