@@ -19,4 +19,6 @@ interface BetRepositoryInterface
     public function fetchBetsByUserId(int $userId) : ?array;
 
     public function getById(int $betId) : ?array;
+
+    public function processMatches(?array $bets = null, ?array $matches = null) : ?array;
 }

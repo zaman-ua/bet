@@ -4,11 +4,11 @@ namespace App\Core\Http;
 
 interface ResponseInterface
 {
-    public function withStatus(int $code): \App\Core\Http\Response;
+    public function withStatus(int $code): ResponseInterface;
 
-    public function withHeader(string $name, string $value): \App\Core\Http\Response;
+    public function withHeader(string $name, string $value): ResponseInterface;
 
-    public function write(string $body): \App\Core\Http\Response;
+    public function write(string $body): ResponseInterface;
 
     public function status(): int;
 

@@ -4,7 +4,7 @@ namespace App\Core\Http;
 
 interface RequestInterface
 {
-    public function withAttribute(string $key, mixed $value): \App\Core\Http\Request;
+    public function withAttribute(string $key, mixed $value): RequestInterface;
 
     public function getAttribute(string $key, mixed $default = null): mixed;
 
