@@ -64,8 +64,7 @@ final class App
             // вызов контроллера
             if (is_string($handler)) {
                 // для инвокабл контроллера
-                $controller = $this->resolveController($handler, $request, $response);
-                $response = $controller();
+                $response = $this->resolveController($handler, $request, $response)();
 
             } elseif (is_array($handler)) {
                 // для конкретного метода контроллера
