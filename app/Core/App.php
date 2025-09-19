@@ -2,9 +2,9 @@
 
 namespace App\Core;
 
-use App\Core\Http\RequestInterface;
 use App\Core\Http\Response;
-use App\Core\Http\ResponseInterface;
+use App\Core\Interface\RequestInterface;
+use App\Core\Interface\ResponseInterface;
 use App\Exception\ErrorHandler;
 use App\Http\Controller;
 use ReflectionClass;

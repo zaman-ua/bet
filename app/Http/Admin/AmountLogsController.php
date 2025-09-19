@@ -2,9 +2,9 @@
 
 namespace App\Http\Admin;
 
-use App\Core\Http\RequestInterface;
-use App\Core\Http\ResponseInterface;
 use App\Core\Interface\AuthServiceInterface;
+use App\Core\Interface\RequestInterface;
+use App\Core\Interface\ResponseInterface;
 use App\Http\Controller;
 use App\Interface\UserAccountLogRepositoryInterface;
 use App\Traits\WithTwigTrait;

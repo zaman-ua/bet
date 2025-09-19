@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Core\Http;
 
+use App\Core\Interface\RequestInterface;
+
 final class Request implements RequestInterface
 {
     // соберем все что есть из глобальных переменных

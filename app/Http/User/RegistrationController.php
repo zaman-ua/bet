@@ -2,9 +2,9 @@
 
 namespace App\Http\User;
 
-use App\Core\Http\RequestInterface;
-use App\Core\Http\ResponseInterface;
 use App\Core\Interface\AuthServiceInterface;
+use App\Core\Interface\RequestInterface;
+use App\Core\Interface\ResponseInterface;
 use App\DTO\UserCreateDTO;
 use App\Http\Controller;
 use App\Interface\UserRepositoryInterface;

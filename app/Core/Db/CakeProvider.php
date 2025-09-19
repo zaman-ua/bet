@@ -2,11 +2,12 @@
 
 namespace App\Core\Db;
 
+use App\Core\Interface\DbProviderInterface;
+use App\Exception\ConfigurationException;
 use Cake\Database\Connection;
 use Cake\Database\Driver\Mysql;
 use Cake\Database\Driver\Postgres;
 use Cake\Database\Driver\Sqlserver;
-use App\Exception\ConfigurationException;
 
 class CakeProvider implements DbProviderInterface
 {

@@ -2,12 +2,12 @@
 
 namespace App\Traits;
 
-use App\Core\Http\ResponseInterface;
+use App\Core\Interface\ResponseInterface;
 use App\Exception\TwigRenderException;
+use Throwable;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use Twig\TwigFunction;
-use Throwable;
 
 /**
  * @property \App\Core\Interface\AuthServiceInterface $authService

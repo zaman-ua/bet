@@ -2,6 +2,7 @@
 
 namespace App\Core\Db;
 
+use App\Core\Interface\DbProviderInterface;
 use App\Exception\ConfigurationException;
 use Throwable;
 

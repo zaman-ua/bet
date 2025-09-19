@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Core\Http;
 
+use App\Core\Interface\ResponseInterface;
+
 final class Response implements ResponseInterface
 {
     private int $status = 200;

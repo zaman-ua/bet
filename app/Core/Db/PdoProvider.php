@@ -2,9 +2,10 @@
 
 namespace App\Core\Db;
 
+use App\Core\Interface\DbProviderInterface;
+use App\Exception\ConfigurationException;
 use PDO;
 use PDOStatement;
-use App\Exception\ConfigurationException;
 
 class PdoProvider implements DbProviderInterface
 {

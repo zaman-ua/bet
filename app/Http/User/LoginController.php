@@ -2,7 +2,7 @@
 
 namespace App\Http\User;
 
-use App\Core\Http\ResponseInterface;
+use App\Core\Interface\ResponseInterface;
 use App\Http\Controller;
 use App\Traits\WithRequestValidateTrait;
 use App\Traits\WithTwigTrait;
