@@ -10,10 +10,13 @@ use App\Enums\OutcomeEnum;
 use App\Interface\BetRepositoryInterface;
 use App\Interface\UserRepositoryInterface;
 use App\Services\BettingService;
+use App\Traits\WithTwigTrait;
 use App\Validation\CreateBetValidator;
 
 final class BetController extends Controller
 {
+    use WithTwigTrait;
+
     public function __construct(
         RequestInterface $request,
         ResponseInterface $response,

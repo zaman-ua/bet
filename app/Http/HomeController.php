@@ -8,9 +8,12 @@ use App\Core\Http\ResponseInterface;
 use App\Interface\BetRepositoryInterface;
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\UserRepositoryInterface;
+use App\Traits\WithTwigTrait;
 
 final class HomeController extends Controller
 {
+    use WithTwigTrait;
+
     public function __construct(
         RequestInterface $request,
         ResponseInterface $response,

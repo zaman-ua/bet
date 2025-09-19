@@ -4,14 +4,10 @@ namespace App\Http;
 
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
-use App\Traits\WithRequestValidateTrait;
-use App\Traits\WithTwigTrait;
 
 
 abstract class Controller
 {
-    use WithTwigTrait;
-    use WithRequestValidateTrait;
     protected array $oldData = [];
     public array $errors = [];
 

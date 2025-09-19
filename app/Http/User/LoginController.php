@@ -5,9 +5,14 @@ namespace App\Http\User;
 use App\Core\Auth;
 use App\Core\Http\ResponseInterface;
 use App\Http\Controller;
+use App\Traits\WithRequestValidateTrait;
+use App\Traits\WithTwigTrait;
 
 class LoginController extends Controller
 {
+    use WithTwigTrait;
+    use WithRequestValidateTrait;
+
     public function index() : ResponseInterface
     {
         Auth::logoutUser();

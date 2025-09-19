@@ -10,9 +10,12 @@ use App\Http\Controller;
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\UserRepositoryInterface;
 use App\Services\AmountService;
+use App\Traits\WithTwigTrait;
 
 final class UsersController extends Controller
 {
+    use WithTwigTrait;
+
     public function __construct(
         RequestInterface $request,
         ResponseInterface $response,

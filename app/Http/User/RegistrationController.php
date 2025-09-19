@@ -8,9 +8,13 @@ use App\Core\Http\ResponseInterface;
 use App\DTO\UserCreateDTO;
 use App\Http\Controller;
 use App\Interface\UserRepositoryInterface;
+use App\Traits\WithRequestValidateTrait;
+use App\Traits\WithTwigTrait;
 
 class RegistrationController extends Controller
 {
+    use WithTwigTrait;
+    use WithRequestValidateTrait;
 
     public function __construct(RequestInterface $request, ResponseInterface $response, private readonly UserRepositoryInterface $userRepository) {
         parent::__construct($request, $response);

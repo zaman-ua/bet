@@ -8,10 +8,13 @@ use App\Core\Http\ResponseInterface;
 use App\Http\Controller;
 use App\Interface\BetRepositoryInterface;
 use App\Services\BetPlayService;
+use App\Traits\WithTwigTrait;
 use RuntimeException;
 
 final class BetsController extends Controller
 {
+    use WithTwigTrait;
+
     public function __construct(
         RequestInterface $request,
         ResponseInterface $response,
