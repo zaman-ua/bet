@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
-use App\Core\Http\Request;
+use App\Core\Http\RequestInterface;
 
 // Мини-роутер с плейсхолдерами {id} и {id:\d+}
 final class Router
@@ -35,7 +35,7 @@ final class Router
     }
 
     // проверка соответствия маршруту
-    public function match(Request $request): ?array
+    public function match(RequestInterface $request): ?array
     {
         $list = $this->routes[$request->method] ?? [];
 

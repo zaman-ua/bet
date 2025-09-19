@@ -2,15 +2,15 @@
 
 namespace App\Exception;
 
-use App\Core\Http\Request;
-use App\Core\Http\Response;
+use App\Core\Http\RequestInterface;
+use App\Core\Http\ResponseInterface;
 use Throwable;
 
 
 final class ErrorHandler
 {
     public function __construct(private bool $debug = false) {}
-    public function render(Throwable $e, Request $request, Response $response): Response
+    public function render(Throwable $e, RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         // логируем (минимально)
         error_log(sprintf('[%s] %s: %s in %s:%d',
