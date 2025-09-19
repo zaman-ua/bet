@@ -3,8 +3,9 @@
 declare(strict_types=1);
 
 // автозагрузка через composer
-use App\Core\Auth;
 use App\Core\Container;
+use App\Core\Service\AuthService;
+use App\Core\Service\RememberMeService;
 use App\Domain\Money;
 use App\Domain\MoneyFactory;
 use App\Interface\BetRepositoryInterface;
@@ -67,8 +68,17 @@ $container->set(UserRepositoryInterface::class, static fn (): UserRepositoryInte
     $container->get(MoneyFactory::class),
 ));
 
-Auth::setUserRepository($container->get(UserRepositoryInterface::class));
-Auth::resumeFromRememberCookie();
+$container->set(RememberMeService::class, static fn (): RememberMeService => new RememberMeService(
+    (string) env('APP_SECRET'),
+));
+
+$container->set(AuthService::class, static fn (Container $container): AuthService => new AuthService(
+    $container->get(UserRepositoryInterface::class),
+    $container->get(RememberMeService::class),
+));
+
+// то что переносили свыше Auth::resumeFromRememberCookie();
+$container->get(AuthService::class)->resumeFromRememberCookie();
 
 $container->set(AmountService::class, static fn (Container $container): AmountService => new AmountService(
     $container->get(UserAmountRepositoryInterface::class),

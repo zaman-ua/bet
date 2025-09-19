@@ -2,9 +2,9 @@
 
 namespace App\Http;
 
-use App\Core\Auth;
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
+use App\Core\Service\AuthService;
 use App\Domain\MoneyFactory;
 use App\DTO\BetCreateDTO;
 use App\Enums\OutcomeEnum;
@@ -25,13 +25,14 @@ final class BetController extends Controller
         private readonly BetRepositoryInterface $betRepository,
         private readonly UserRepositoryInterface $userRepository,
         private readonly MoneyFactory $moneyFactory,
+        AuthService $authService,
     ) {
-        parent::__construct($request, $response);
+        parent::__construct($request, $response, $authService);
     }
 
     public function store(): ResponseInterface
     {
-        if(!Auth::isLoggedIn()) {
+        if(!$this->authService->isLoggedIn()) {
             return $this->json([
                 'error' => 'not logged in',
             ], 403);
@@ -42,7 +43,7 @@ final class BetController extends Controller
 
             $data = $this->request->getPost();
 
-            $userId         = Auth::getUserId();
+            $userId         = $this->authService->getUserId();
             $currencyId     = (int)($data['currency_id'] ?? '');
             $matchId        = (string)($data['match_id'] ?? '');
             $outcome        = (string)($data['outcome'] ?? '');
@@ -63,7 +64,7 @@ final class BetController extends Controller
             ));
 
             // обновляем баланс пользователя так же как и в админке
-            $amountArray = $this->userRepository->fetchAmountsById(Auth::getUserId());
+            $amountArray = $this->userRepository->fetchAmountsById($this->authService->getUserId());
             $amountsHtml = $this->fetch('shared/user_amounts.html.twig', [
                 'amounts_array' => $amountArray
             ]);

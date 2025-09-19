@@ -4,6 +4,7 @@ namespace App\Http;
 
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
+use App\Core\Service\AuthService;
 
 
 abstract class Controller
@@ -13,7 +14,11 @@ abstract class Controller
 
     // применим фишки php8 с автоматическим созданием атрибута
     // через указание в параметрах конструктора
-    public function __construct(public RequestInterface $request, public ResponseInterface $response) {
+    public function __construct(
+        public RequestInterface $request,
+        public ResponseInterface $response,
+        protected AuthService $authService
+    ) {
         $this->oldData = $this->request->getPost() ?? [];
     }
 

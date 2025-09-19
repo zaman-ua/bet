@@ -2,9 +2,9 @@
 
 namespace App\Http\Admin;
 
-use App\Core\Auth;
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
+use App\Core\Service\AuthService;
 use App\Domain\MoneyFactory;
 use App\Http\Controller;
 use App\Interface\CurrencyRepositoryInterface;
@@ -23,14 +23,15 @@ final class UsersController extends Controller
         private readonly CurrencyRepositoryInterface $currencyRepository,
         private readonly UserRepositoryInterface $userRepository,
         private readonly MoneyFactory $moneyFactory,
+        AuthService $authService,
     ) {
-        parent::__construct($request, $response);
+        parent::__construct($request, $response, $authService);
     }
 
     public function index() : ResponseInterface
     {
         // если пользователь зашел куда его не просили
-        if(!Auth::isAdmin()) {
+        if(!$this->authService->isAdmin()) {
             return $this->redirect('/');
         }
 

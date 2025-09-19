@@ -59,10 +59,10 @@ trait WithTwigTrait
             $twig->addFunction(new TwigFunction('assets', 'assets'));
             $twig->addFunction(new TwigFunction('csrf_token', 'csrf_token'));
             $twig->addFunction(new TwigFunction('var_dump', 'var_dump'));
-            $twig->addFunction(new TwigFunction('isLoggedIn', 'App\Core\Auth::isLoggedIn'));
-            $twig->addFunction(new TwigFunction('getUser', 'App\Core\Auth::getUser'));
-            $twig->addFunction(new TwigFunction('isAdmin', 'App\Core\Auth::isAdmin'));
-            $twig->addFunction(new TwigFunction('getUserId', 'App\Core\Auth::getUserId'));
+            $twig->addFunction(new TwigFunction('isLoggedIn', fn (): bool => $this->authService->isLoggedIn()));
+            $twig->addFunction(new TwigFunction('getUser', fn (): array => $this->authService->getUser()));
+            $twig->addFunction(new TwigFunction('isAdmin', fn (): bool => $this->authService->isAdmin()));
+            $twig->addFunction(new TwigFunction('getUserId', fn (): ?int => $this->authService->getUserId()));
 
             return $twig;
         } catch (Throwable $e) {

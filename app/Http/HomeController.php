@@ -2,9 +2,9 @@
 
 namespace App\Http;
 
-use App\Core\Auth;
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
+use App\Core\Service\AuthService;
 use App\Interface\BetRepositoryInterface;
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\UserRepositoryInterface;
@@ -20,19 +20,20 @@ final class HomeController extends Controller
         private readonly CurrencyRepositoryInterface $currencyRepository,
         private readonly BetRepositoryInterface $betRepository,
         private readonly UserRepositoryInterface $userRepository,
+        AuthService $authService,
     ) {
-        parent::__construct($request, $response);
+        parent::__construct($request, $response, $authService);
     }
 
     public function __invoke() : ResponseInterface
     {
         // такого не должно быть, но в жизни всякое бывает
-        if(Auth::isAdmin()) {
+        if($this->authService->isAdmin()) {
             return $this->redirect('/admin/bets');
         }
 
-        if(Auth::isLoggedIn()) {
-            $userId = Auth::getUserId();
+        if($this->authService->isLoggedIn()) {
+            $userId = $this->authService->getUserId();
             if($userId) {
                 $amounts = $this->userRepository->fetchAmountsById($userId);
                 $bets = $this->betRepository->fetchBetsByUserId($userId);

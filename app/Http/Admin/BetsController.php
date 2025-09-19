@@ -2,9 +2,9 @@
 
 namespace App\Http\Admin;
 
-use App\Core\Auth;
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
+use App\Core\Service\AuthService;
 use App\Http\Controller;
 use App\Interface\BetRepositoryInterface;
 use App\Services\BetPlayService;
@@ -20,14 +20,15 @@ final class BetsController extends Controller
         ResponseInterface $response,
         private readonly BetPlayService $betPlayService,
         private readonly BetRepositoryInterface $betRepository,
+        AuthService $authService,
     ) {
-        parent::__construct($request, $response);
+        parent::__construct($request, $response, $authService);
     }
 
     public function index() : ResponseInterface
     {
         // если пользователь зашел куда его не просили
-        if(!Auth::isAdmin()) {
+        if(!$this->authService->isAdmin()) {
             return $this->redirect('/');
         }
 

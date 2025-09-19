@@ -2,9 +2,9 @@
 
 namespace App\Http\User;
 
-use App\Core\Auth;
 use App\Core\Http\RequestInterface;
 use App\Core\Http\ResponseInterface;
+use App\Core\Service\AuthService;
 use App\DTO\UserCreateDTO;
 use App\Http\Controller;
 use App\Interface\UserRepositoryInterface;
@@ -16,8 +16,12 @@ class RegistrationController extends Controller
     use WithTwigTrait;
     use WithRequestValidateTrait;
 
-    public function __construct(RequestInterface $request, ResponseInterface $response, private readonly UserRepositoryInterface $userRepository) {
-        parent::__construct($request, $response);
+    public function __construct(
+        RequestInterface $request, ResponseInterface $response,
+        private readonly UserRepositoryInterface $userRepository,
+        AuthService $authService,
+    ) {
+        parent::__construct($request, $response, $authService);
     }
     public function index() : ResponseInterface
     {
@@ -90,7 +94,7 @@ class RegistrationController extends Controller
 
             // сразу его и авторизуем
             // запоминаемся в сессию
-            Auth::loginUser($userId);
+            $this->authService->loginById($userId);
 
             if($this->request->wantsJson()) {
                 return $this->json(['ok' => true]);

@@ -2,7 +2,6 @@
 
 namespace App\Http\User;
 
-use App\Core\Auth;
 use App\Core\Http\ResponseInterface;
 use App\Http\Controller;
 use App\Traits\WithRequestValidateTrait;
@@ -15,8 +14,7 @@ class LoginController extends Controller
 
     public function index() : ResponseInterface
     {
-        Auth::logoutUser();
-        Auth::clearRememberCookie();
+        $this->authService->logout();
 
         return $this->render('user/login.html.twig');
     }
@@ -35,7 +33,7 @@ class LoginController extends Controller
             return $this->json(['errors' => $this->errors], 422);
         }
 
-        $isOk = Auth::login($validated['login'], $validated['password'], $validated['remember_me']);
+        $isOk = $this->authService->login($validated['login'], $validated['password'], $validated['remember_me']);
         if(!$isOk) {
             return $this->json(['errors' => [
                 'errors' => 'Пользователь не существует или пароль не верен'
@@ -43,7 +41,7 @@ class LoginController extends Controller
         }
 
         // тут бы правильный редирект для админа сделать
-        if(Auth::isAdmin()) {
+        if($this->authService->isAdmin()) {
             return $this->json([
                 'ok' => true,
                 'redirect' => '/admin/bets'
