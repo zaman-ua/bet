@@ -52,49 +52,21 @@ session_start();
 
 $container = new Container();
 
-$container->set(MoneyFactory::class, static fn (Container $container): MoneyFactory => new MoneyFactory(
-    $container->get(CurrencyRepositoryInterface::class),
-));
-
-$container->set(BetRepositoryInterface::class, static fn (): BetRepositoryInterface => new BetRepository(
-    $container->get(MoneyFactory::class),
-));
-$container->set(CurrencyRepositoryInterface::class, static fn (): CurrencyRepositoryInterface => new CurrencyRepository());
-$container->set(UserAccountLogRepositoryInterface::class, static fn (): UserAccountLogRepositoryInterface => new UserAccountLogRepository(
-    $container->get(MoneyFactory::class),
-));
-$container->set(UserAmountRepositoryInterface::class, static fn (): UserAmountRepositoryInterface => new UserAmountRepository());
-$container->set(UserRepositoryInterface::class, static fn (): UserRepositoryInterface => new UserRepository(
-    $container->get(MoneyFactory::class),
-));
+// в контейнере сделан автовайринг
+// репозитории создаются не напрямую, а через интерфейсы, по этому их нужно добавить
+$container->set(BetRepositoryInterface::class, static fn (Container $container): BetRepositoryInterface => $container->get(BetRepository::class));
+$container->set(CurrencyRepositoryInterface::class, static fn (Container $container): CurrencyRepositoryInterface => $container->get(CurrencyRepository::class));
+$container->set(UserAccountLogRepositoryInterface::class, static fn (Container $container): UserAccountLogRepositoryInterface => $container->get(UserAccountLogRepository::class));
+$container->set(UserAmountRepositoryInterface::class, static fn (Container $container): UserAmountRepositoryInterface => $container->get(UserAmountRepository::class));
+$container->set(UserRepositoryInterface::class, static fn (Container $container): UserRepositoryInterface => $container->get(UserRepository::class));
 
 $container->set(RememberMeService::class, static fn (): RememberMeService => new RememberMeService(
     (string) env('APP_SECRET'),
 ));
 
-$container->set(AuthServiceInterface::class, static fn (Container $container): AuthServiceInterface => new AuthService(
-    $container->get(UserRepositoryInterface::class),
-    $container->get(RememberMeService::class),
-));
+$container->set(AuthServiceInterface::class, static fn (Container $container): AuthServiceInterface => $container->get(AuthService::class));
 
 // то что переносили свыше Auth::resumeFromRememberCookie();
 $container->get(AuthServiceInterface::class)->resumeFromRememberCookie();
-
-$container->set(AmountService::class, static fn (Container $container): AmountService => new AmountService(
-    $container->get(UserAmountRepositoryInterface::class),
-    $container->get(UserAccountLogRepositoryInterface::class),
-));
-
-$container->set(BetPlayService::class, static fn (Container $container): BetPlayService => new BetPlayService(
-    $container->get(UserAmountRepositoryInterface::class),
-    $container->get(BetRepositoryInterface::class),
-    $container->get(UserAccountLogRepositoryInterface::class),
-));
-
-$container->set(BettingService::class, static fn (Container $container): BettingService => new BettingService(
-    $container->get(UserAmountRepositoryInterface::class),
-    $container->get(BetRepositoryInterface::class),
-    $container->get(UserAccountLogRepositoryInterface::class),
-));
 
 return $container;
