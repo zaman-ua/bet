@@ -2,8 +2,22 @@
 
 namespace App\Validation;
 
+use App\Validation\Rules\BooleanRule;
+use App\Validation\Rules\DateRule;
+use App\Validation\Rules\EmailRule;
+use App\Validation\Rules\InRule;
+use App\Validation\Rules\IntRule;
+use App\Validation\Rules\MaxRule;
+use App\Validation\Rules\MinRule;
+use App\Validation\Rules\NullableRule;
+use App\Validation\Rules\RequiredRule;
+use App\Validation\Rules\StringRule;
+
 final class RequestValidator
 {
+    /** @var ValidationRuleInterface[] */
+    private static array $ruleHandlers = [];
+
     public static function validate(array $data, array $validation) : array
     {
         $errors = [];
@@ -14,68 +28,27 @@ final class RequestValidator
             foreach ($validation as $field => $rules) {
 
                 $value = $data[$field] ?? null;
-                $value = trim($value);
 
-                $nullable = in_array('nullable', $rules, true);
-                $required = in_array('required', $rules, true);
-
-                if (!$nullable && $required && ($value === null || $value === '')) {
-                    $errors[$field] = 'Обязательное поле';
-                    continue;
-                }
-
-                if ($nullable && ($value === null || $value === '')) {
-                    $result[$field] = null;
-                    continue;
+                if (is_string($value)) {
+                    $value = trim($value);
                 }
 
                 foreach ($rules as $rule) {
-                    if (in_array($rule, ['required','nullable','string'], true)) {
-                        if ($rule === 'string' && !is_string($value)) {
-                            $errors[$field] = 'Должно быть строкой'; break;
-                        }
+                    $handler = self::resolveRule($rule);
+                    if ($handler === null) {
                         continue;
                     }
 
-                    if ($rule === 'email') {
-                        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                            $errors[$field] = 'Некорректный email'; break;
-                        }
-                    } elseif ($rule === 'int') {
-                        if (filter_var($value, FILTER_VALIDATE_INT) === false) {
-                            $errors[$field] = 'Должно быть целым числом'; break;
-                        }
-                        $value = (int)$value;
-                    } elseif ($rule === 'boolean') {
-                        $value = !empty($value);
+                    $outcome = $handler->validate($field, $value, $rule, $data);
+                    $value = $outcome->value();
 
-                    } elseif (str_starts_with($rule, 'min:')) {
-                        $min = (int)substr($rule, 4);
-                        if (is_string($value) && mb_strlen($value) < $min) {
-                            $errors[$field] = "Минимум {$min} символов"; break;
-                        }
-                        if (is_int($value) && $value < $min) {
-                            $errors[$field] = "Не меньше {$min}"; break;
-                        }
-                    } elseif (str_starts_with($rule, 'max:')) {
-                        $max = (int)substr($rule, 4);
-                        if (is_string($value) && mb_strlen($value) > $max) {
-                            $errors[$field] = "Максимум {$max} символов"; break;
-                        }
-                        if ((is_int($value) || is_float($value)) && $value > $max) {
-                            $errors[$field] = "Не больше {$max}"; break;
-                        }
-                    } elseif (str_starts_with($rule, 'in:')) {
-                        $allowed = explode(',', substr($rule, 3));
-                        if (!in_array((string)$value, $allowed, true)) {
-                            $errors[$field] = 'Недопустимое значение'; break;
-                        }
-                    } elseif (str_starts_with($rule, 'date:')) {
-                        $fmt = substr($rule, 5) ?: 'Y-m-d';
-                        $dt  = \DateTime::createFromFormat($fmt, (string)$value);
-                        if (!$dt || $dt->format($fmt) !== $value) {
-                            $errors[$field] = 'Некорректная дата'; break;
-                        }
+                    if ($outcome->error() !== null) {
+                        $errors[$field] = $outcome->error();
+                        break;
+                    }
+
+                    if ($outcome->shouldStop()) {
+                        break;
                     }
                 }
 
@@ -89,5 +62,39 @@ final class RequestValidator
             $result,
             $errors
         ];
+    }
+
+    /**
+     * @return ValidationRuleInterface[]
+     */
+    private static function rules(): array
+    {
+        if (self::$ruleHandlers === []) {
+            self::$ruleHandlers = [
+                new NullableRule(),
+                new RequiredRule(),
+                new StringRule(),
+                new EmailRule(),
+                new IntRule(),
+                new BooleanRule(),
+                new MinRule(),
+                new MaxRule(),
+                new InRule(),
+                new DateRule(),
+            ];
+        }
+
+        return self::$ruleHandlers;
+    }
+
+    private static function resolveRule(string $rule): ?ValidationRuleInterface
+    {
+        foreach (self::rules() as $handler) {
+            if ($handler->supports($rule)) {
+                return $handler;
+            }
+        }
+
+        return null;
     }
 }
