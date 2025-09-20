@@ -8,6 +8,7 @@ use App\Core\Interface\ResponseInterface;
 use App\Enums\BetStatusEnum;
 use App\Http\Controller;
 use App\Interface\BetRepositoryInterface;
+use App\Interface\MatchConfigProviderInterface;
 use App\Services\BetPlayService;
 use App\Traits\WithTwigTrait;
 use RuntimeException;
@@ -22,6 +23,7 @@ final class BetsController extends Controller
         private readonly BetPlayService $betPlayService,
         private readonly BetRepositoryInterface $betRepository,
         AuthServiceInterface $authService,
+        private readonly MatchConfigProviderInterface $matchConfigProvider,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -34,7 +36,7 @@ final class BetsController extends Controller
         }
 
         $bets = $this->betRepository->fetchAll();
-        $matches = require APP_ROOT . '/config/matches.php';
+        $matches = $this->matchConfigProvider->getMatches();
 
         $bets = $this->betRepository->processMatches($bets, $matches);
 

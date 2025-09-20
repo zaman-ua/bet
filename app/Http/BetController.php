@@ -9,6 +9,7 @@ use App\Domain\MoneyFactory;
 use App\DTO\BetCreateDTO;
 use App\Enums\OutcomeEnum;
 use App\Interface\BetRepositoryInterface;
+use App\Interface\MatchConfigProviderInterface;
 use App\Interface\UserRepositoryInterface;
 use App\Services\BettingService;
 use App\Traits\WithTwigTrait;
@@ -26,6 +27,7 @@ final class BetController extends Controller
         private readonly UserRepositoryInterface $userRepository,
         private readonly MoneyFactory $moneyFactory,
         AuthServiceInterface $authService,
+        private readonly MatchConfigProviderInterface $matchConfigProvider,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -39,7 +41,7 @@ final class BetController extends Controller
         }
 
         try {
-            $config = require APP_ROOT . '/config/bets.php';
+            $config = $this->matchConfigProvider->getBetConfig();
 
             $data = $this->request->getPost();
 
@@ -70,7 +72,7 @@ final class BetController extends Controller
             ]);
 
             $bets = $this->betRepository->fetchBetsByUserId($userId);
-            $matches = require APP_ROOT . '/config/matches.php';
+            $matches = $this->matchConfigProvider->getMatches();
             $bets = $this->betRepository->processMatches($bets ?? [], $matches);
 
             $betsTable = $this->fetch('shared/user_bets.html.twig', [

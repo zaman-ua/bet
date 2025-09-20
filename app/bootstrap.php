@@ -11,9 +11,11 @@ use App\Core\Service\AuthService;
 use App\Core\Service\RememberMeService;
 use App\Interface\BetRepositoryInterface;
 use App\Interface\CurrencyRepositoryInterface;
+use App\Interface\MatchConfigProviderInterface;
 use App\Interface\UserAccountLogRepositoryInterface;
 use App\Interface\UserAmountRepositoryInterface;
 use App\Interface\UserRepositoryInterface;
+use App\Provider\MatchConfigProvider;
 use App\Repository\BetRepository;
 use App\Repository\CurrencyRepository;
 use App\Repository\UserAccountLogRepository;
@@ -65,6 +67,7 @@ $container->set(CurrencyRepositoryInterface::class, static fn (Container $contai
 $container->set(UserAccountLogRepositoryInterface::class, static fn (Container $container): UserAccountLogRepositoryInterface => $container->get(UserAccountLogRepository::class));
 $container->set(UserAmountRepositoryInterface::class, static fn (Container $container): UserAmountRepositoryInterface => $container->get(UserAmountRepository::class));
 $container->set(UserRepositoryInterface::class, static fn (Container $container): UserRepositoryInterface => $container->get(UserRepository::class));
+$container->set(MatchConfigProviderInterface::class, static fn (Container $container): MatchConfigProviderInterface => $container->get(MatchConfigProvider::class));
 
 // записываем вручную что бы передать конфиг
 $container->set(RememberMeService::class, static fn (): RememberMeService => new RememberMeService(
