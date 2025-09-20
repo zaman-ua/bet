@@ -4,10 +4,9 @@ namespace App\Repository;
 
 use App\Core\Interface\DbInterface;
 use App\Domain\MoneyFactory;
-use App\DTO\UserCreateDTO;
-use App\Interface\UserRepositoryInterface;
+use App\Interface\UserReaderRepositoryInterface;
 
-final class UserRepository implements UserRepositoryInterface
+final class UserReaderRepository implements UserReaderRepositoryInterface
 {
     public function __construct(
         private readonly MoneyFactory $moneyFactory,
@@ -40,31 +39,6 @@ final class UserRepository implements UserRepositoryInterface
     public function getUserIdByLogin(string $login) : ?int
     {
         return $this->db->getOne('SELECT id FROM `users` WHERE `login` = ?', [$login]);
-    }
-
-    public function createUser(UserCreateDTO $dto) : ?int
-    {
-        $this->db->execute("INSERT INTO `users` (`login`, `password_hash`, `name`, `gender`, `birth_date`) VALUES (?, ?, ?, ?, ?)", [
-            $dto->login,
-            $dto->password_hash,
-            $dto->name,
-            $dto->gender,
-            $dto->birth_date
-        ]);
-
-        // ид вставленной строки
-        return $this->db->lastInsertId();
-    }
-
-    public function createUserContact(int $userId, string $type, string $value) : ?int
-    {
-        $this->db->execute("INSERT INTO `user_contacts` (`user_id`, `type`, `value`) VALUES (?, ?, ?)", [
-            $userId,
-            $type,
-            $value,
-        ]);
-
-        return $this->db->lastInsertId();
     }
 
     public function fetchAll() : ?array

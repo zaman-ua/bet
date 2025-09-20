@@ -8,7 +8,7 @@ use App\Core\Interface\ResponseInterface;
 use App\Domain\MoneyFactory;
 use App\Http\Controller;
 use App\Interface\CurrencyRepositoryInterface;
-use App\Interface\UserRepositoryInterface;
+use App\Interface\UserReaderRepositoryInterface;
 use App\Services\AmountService;
 use App\Traits\WithTwigTrait;
 
@@ -17,13 +17,13 @@ final class UsersController extends Controller
     use WithTwigTrait;
 
     public function __construct(
-        RequestInterface $request,
-        ResponseInterface $response,
-        private readonly AmountService $amountService,
-        private readonly CurrencyRepositoryInterface $currencyRepository,
-        private readonly UserRepositoryInterface $userRepository,
-        private readonly MoneyFactory $moneyFactory,
-        AuthServiceInterface $authService,
+        RequestInterface                               $request,
+        ResponseInterface                              $response,
+        private readonly AmountService                 $amountService,
+        private readonly CurrencyRepositoryInterface   $currencyRepository,
+        private readonly UserReaderRepositoryInterface $userReaderRepository,
+        private readonly MoneyFactory                  $moneyFactory,
+        AuthServiceInterface                           $authService,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -35,7 +35,7 @@ final class UsersController extends Controller
             return $this->redirect('/');
         }
 
-        $users = $this->userRepository->fetchAll();
+        $users = $this->userReaderRepository->fetchAll();
         $currencies = $this->currencyRepository->getAssoc();
 
         return $this->render('admin/users.html.twig', [
@@ -72,7 +72,7 @@ final class UsersController extends Controller
             }
         }
 
-        $amountArray = $this->userRepository->fetchAmountsById($data['user_id']);
+        $amountArray = $this->userReaderRepository->fetchAmountsById($data['user_id']);
 
         $amountsHtml = $this->fetch('shared/user_amounts.html.twig', [
             'amounts_array' => $amountArray

@@ -14,13 +14,15 @@ use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\MatchConfigProviderInterface;
 use App\Interface\UserAccountLogRepositoryInterface;
 use App\Interface\UserAmountRepositoryInterface;
-use App\Interface\UserRepositoryInterface;
+use App\Interface\UserReaderRepositoryInterface;
+use App\Interface\UserWriterRepositoryInterface;
 use App\Provider\MatchConfigProvider;
 use App\Repository\BetRepository;
 use App\Repository\CurrencyRepository;
 use App\Repository\UserAccountLogRepository;
 use App\Repository\UserAmountRepository;
-use App\Repository\UserRepository;
+use App\Repository\UserReaderRepository;
+use App\Repository\UserWriterRepository;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -66,7 +68,8 @@ $container->set(BetRepositoryInterface::class, static fn (Container $container):
 $container->set(CurrencyRepositoryInterface::class, static fn (Container $container): CurrencyRepositoryInterface => $container->get(CurrencyRepository::class));
 $container->set(UserAccountLogRepositoryInterface::class, static fn (Container $container): UserAccountLogRepositoryInterface => $container->get(UserAccountLogRepository::class));
 $container->set(UserAmountRepositoryInterface::class, static fn (Container $container): UserAmountRepositoryInterface => $container->get(UserAmountRepository::class));
-$container->set(UserRepositoryInterface::class, static fn (Container $container): UserRepositoryInterface => $container->get(UserRepository::class));
+$container->set(UserReaderRepositoryInterface::class, static fn (Container $container): UserReaderRepositoryInterface => $container->get(UserReaderRepository::class));
+$container->set(UserWriterRepositoryInterface::class, static fn (Container $container): UserWriterRepositoryInterface => $container->get(UserWriterRepository::class));
 $container->set(MatchConfigProviderInterface::class, static fn (Container $container): MatchConfigProviderInterface => $container->get(MatchConfigProvider::class));
 
 // записываем вручную что бы передать конфиг

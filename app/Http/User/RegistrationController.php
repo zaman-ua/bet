@@ -7,7 +7,8 @@ use App\Core\Interface\RequestInterface;
 use App\Core\Interface\ResponseInterface;
 use App\DTO\UserCreateDTO;
 use App\Http\Controller;
-use App\Interface\UserRepositoryInterface;
+use App\Interface\UserReaderRepositoryInterface;
+use App\Interface\UserWriterRepositoryInterface;
 use App\Traits\WithRequestValidateTrait;
 use App\Traits\WithTwigTrait;
 
@@ -17,10 +18,11 @@ class RegistrationController extends Controller
     use WithRequestValidateTrait;
 
     public function __construct(
-        RequestInterface $request,
-        ResponseInterface $response,
-        private readonly UserRepositoryInterface $userRepository,
-        AuthServiceInterface $authService,
+        RequestInterface                               $request,
+        ResponseInterface                              $response,
+        private readonly UserReaderRepositoryInterface $userReaderRepository,
+        private readonly UserWriterRepositoryInterface $userWriterRepository,
+        AuthServiceInterface                           $authService,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -51,7 +53,7 @@ class RegistrationController extends Controller
 
         // проверим на существование логин пользователя
         if(!empty($validated['login'])) {
-            $userExist = $this->userRepository->getUserIdByLogin($validated['login']);
+            $userExist = $this->userReaderRepository->getUserIdByLogin($validated['login']);
             if(!empty($userExist)) {
                 if(!in_array('login', array_keys($this->errors))) {
                     $this->errors['login'] = 'такой login уже существует';
@@ -73,7 +75,7 @@ class RegistrationController extends Controller
 
         try {
             // вставляем пользователя
-            $userId = $this->userRepository->createUser(new UserCreateDTO(
+            $userId = $this->userWriterRepository->createUser(new UserCreateDTO(
                 login: $validated['login'],
                 password_hash: $password_hash,
                 name: $validated['name'],
@@ -85,7 +87,7 @@ class RegistrationController extends Controller
             // без валидации данных это все очень плохо
             if(!empty($this->request->getPost()['contacts'])) {
                 foreach($this->request->getPost()['contacts'] as $contact) {
-                    $this->userRepository->createUserContact(
+                    $this->userWriterRepository->createUserContact(
                         $userId,
                         $contact['type'],
                         $contact['value'],

@@ -10,7 +10,7 @@ use App\DTO\BetCreateDTO;
 use App\Enums\OutcomeEnum;
 use App\Interface\BetRepositoryInterface;
 use App\Interface\MatchConfigProviderInterface;
-use App\Interface\UserRepositoryInterface;
+use App\Interface\UserReaderRepositoryInterface;
 use App\Services\BettingService;
 use App\Services\MatchPresentationService;
 use App\Traits\WithTwigTrait;
@@ -21,15 +21,15 @@ final class BetController extends Controller
     use WithTwigTrait;
 
     public function __construct(
-        RequestInterface $request,
-        ResponseInterface $response,
-        private readonly BettingService $bettingService,
-        private readonly BetRepositoryInterface $betRepository,
-        private readonly UserRepositoryInterface $userRepository,
-        private readonly MoneyFactory $moneyFactory,
-        AuthServiceInterface $authService,
-        private readonly MatchConfigProviderInterface $matchConfigProvider,
-        private readonly MatchPresentationService $matchPresentationService,
+        RequestInterface                               $request,
+        ResponseInterface                              $response,
+        private readonly BettingService                $bettingService,
+        private readonly BetRepositoryInterface        $betRepository,
+        private readonly UserReaderRepositoryInterface $userReaderRepository,
+        private readonly MoneyFactory                  $moneyFactory,
+        AuthServiceInterface                           $authService,
+        private readonly MatchConfigProviderInterface  $matchConfigProvider,
+        private readonly MatchPresentationService      $matchPresentationService,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -68,7 +68,7 @@ final class BetController extends Controller
             ));
 
             // обновляем баланс пользователя так же как и в админке
-            $amountArray = $this->userRepository->fetchAmountsById($this->authService->getUserId());
+            $amountArray = $this->userReaderRepository->fetchAmountsById($this->authService->getUserId());
             $amountsHtml = $this->fetch('shared/user_amounts.html.twig', [
                 'amounts_array' => $amountArray
             ]);

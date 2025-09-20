@@ -3,15 +3,15 @@
 namespace App\Core\Service;
 
 use App\Core\Interface\AuthServiceInterface;
-use App\Interface\UserRepositoryInterface;
+use App\Interface\UserReaderRepositoryInterface;
 
 final class AuthService implements AuthServiceInterface
 {
     private ?array $user = null;
 
     public function __construct(
-        private readonly UserRepositoryInterface $userRepository,
-        private readonly RememberMeService       $rememberMe,
+        private readonly UserReaderRepositoryInterface $userReaderRepository,
+        private readonly RememberMeService             $rememberMe,
     ) {
     }
 
@@ -25,7 +25,7 @@ final class AuthService implements AuthServiceInterface
     public function login(string $login, string $password, bool $remember = false) : bool
     {
         // проверяем наличие пользователя в базе
-        $userRow = $this->userRepository->getUserIdPwdByLogin($login);
+        $userRow = $this->userReaderRepository->getUserIdPwdByLogin($login);
         if(empty($userRow)) {
             return false;
         }
@@ -44,7 +44,7 @@ final class AuthService implements AuthServiceInterface
     public function loginById(int $userId, bool $remember = false): void
     {
         $this->setSessionUserId($userId);
-        $this->user = $this->userRepository->getUserById($userId, true) ?: null;
+        $this->user = $this->userReaderRepository->getUserById($userId, true) ?: null;
 
         if ($remember) {
             $this->rememberMe->setCookie($userId);
@@ -115,7 +115,7 @@ final class AuthService implements AuthServiceInterface
             return;
         }
 
-        $user = $this->userRepository->getUserById((int) $sessionUserId, true);
+        $user = $this->userReaderRepository->getUserById((int) $sessionUserId, true);
         if (empty($user)) {
             $this->clearSession();
             $this->user = null;
@@ -128,7 +128,7 @@ final class AuthService implements AuthServiceInterface
 
     private function userExists(int $userId): bool
     {
-        $user = $this->userRepository->getUserById($userId, true);
+        $user = $this->userReaderRepository->getUserById($userId, true);
 
         return $user != [];
     }

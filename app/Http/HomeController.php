@@ -8,7 +8,7 @@ use App\Core\Interface\ResponseInterface;
 use App\Interface\BetRepositoryInterface;
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\MatchConfigProviderInterface;
-use App\Interface\UserRepositoryInterface;
+use App\Interface\UserReaderRepositoryInterface;
 use App\Services\MatchPresentationService;
 use App\Traits\WithTwigTrait;
 
@@ -17,14 +17,14 @@ final class HomeController extends Controller
     use WithTwigTrait;
 
     public function __construct(
-        RequestInterface $request,
-        ResponseInterface $response,
-        private readonly CurrencyRepositoryInterface $currencyRepository,
-        private readonly BetRepositoryInterface $betRepository,
-        private readonly UserRepositoryInterface $userRepository,
-        AuthServiceInterface $authService,
-        private readonly MatchConfigProviderInterface $matchConfigProvider,
-        private readonly MatchPresentationService $matchPresentationService,
+        RequestInterface                               $request,
+        ResponseInterface                              $response,
+        private readonly CurrencyRepositoryInterface   $currencyRepository,
+        private readonly BetRepositoryInterface        $betRepository,
+        private readonly UserReaderRepositoryInterface $userReaderRepository,
+        AuthServiceInterface                           $authService,
+        private readonly MatchConfigProviderInterface  $matchConfigProvider,
+        private readonly MatchPresentationService      $matchPresentationService,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -39,7 +39,7 @@ final class HomeController extends Controller
         if($this->authService->isLoggedIn()) {
             $userId = $this->authService->getUserId();
             if($userId) {
-                $amounts = $this->userRepository->fetchAmountsById($userId);
+                $amounts = $this->userReaderRepository->fetchAmountsById($userId);
                 $bets = $this->betRepository->fetchBetsByUserId($userId);
             }
         }
