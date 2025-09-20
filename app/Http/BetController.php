@@ -8,28 +8,21 @@ use App\Core\Interface\ResponseInterface;
 use App\Domain\MoneyFactory;
 use App\DTO\BetCreateDTO;
 use App\Enums\OutcomeEnum;
-use App\Interface\BetReaderRepositoryInterface;
+use App\FragmentsService\UserAmountFragmentsService;
 use App\Interface\MatchConfigProviderInterface;
-use App\Interface\UserReaderRepositoryInterface;
 use App\Services\BettingService;
-use App\Services\MatchPresentationService;
-use App\Traits\WithTwigTrait;
 use App\Validation\CreateBetValidator;
 
 final class BetController extends Controller
 {
-    use WithTwigTrait;
-
     public function __construct(
         RequestInterface                               $request,
         ResponseInterface                              $response,
         private readonly BettingService                $bettingService,
-        private readonly BetReaderRepositoryInterface  $betReaderRepository,
-        private readonly UserReaderRepositoryInterface $userReaderRepository,
         private readonly MoneyFactory                  $moneyFactory,
         AuthServiceInterface                           $authService,
         private readonly MatchConfigProviderInterface  $matchConfigProvider,
-        private readonly MatchPresentationService      $matchPresentationService,
+        private readonly UserAmountFragmentsService    $userAmountFragmentsService,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -44,7 +37,6 @@ final class BetController extends Controller
 
         try {
             $config = $this->matchConfigProvider->getBetConfig();
-
             $data = $this->request->getPost();
 
             $userId         = $this->authService->getUserId();
@@ -68,25 +60,13 @@ final class BetController extends Controller
             ));
 
             // обновляем баланс пользователя так же как и в админке
-            $amountArray = $this->userReaderRepository->fetchAmountsById($this->authService->getUserId());
-            $amountsHtml = $this->fetch('shared/user_amounts.html.twig', [
-                'amounts_array' => $amountArray
-            ]);
-
-            $bets = $this->betReaderRepository->fetchBetsByUserId($userId);
-            $matches = $this->matchConfigProvider->getMatches();
-            $bets = $this->matchPresentationService->attachMatches($bets, $matches);
-
-            $betsTable = $this->fetch('shared/user_bets.html.twig', [
-                'bets' => $bets
-            ]);
 
             return $this->json([
                 'ok' => true,
                 'bet_id' => $betId,
                 'status' => 'Ставка успешно создана',
-                'amountsHtml' => $amountsHtml,
-                'betsTable' => $betsTable
+                'amountsHtml' => $this->userAmountFragmentsService->buildAmountForUser($userId),
+                'betsTable' => $this->userAmountFragmentsService->buildBetTableForUser($userId),
             ], 201); // код 201 "Создано"
 
         } catch (\InvalidArgumentException $e) {

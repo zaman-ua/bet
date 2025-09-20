@@ -6,6 +6,7 @@ use App\Core\Interface\AuthServiceInterface;
 use App\Core\Interface\RequestInterface;
 use App\Core\Interface\ResponseInterface;
 use App\Domain\MoneyFactory;
+use App\FragmentsService\UserAmountFragmentsService;
 use App\Http\Controller;
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\UserReaderRepositoryInterface;
@@ -24,6 +25,7 @@ final class UsersController extends Controller
         private readonly UserReaderRepositoryInterface $userReaderRepository,
         private readonly MoneyFactory                  $moneyFactory,
         AuthServiceInterface                           $authService,
+        private readonly UserAmountFragmentsService    $userAmountFragmentsService,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -47,7 +49,6 @@ final class UsersController extends Controller
     public function adjust() : ResponseInterface
     {
         $data = $this->request->getPost();
-        $amountsHtml = '';
 
         if(empty($data['currency']) || empty($data['user_id'])) {
             return $this->json([
@@ -72,15 +73,9 @@ final class UsersController extends Controller
             }
         }
 
-        $amountArray = $this->userReaderRepository->fetchAmountsById($data['user_id']);
-
-        $amountsHtml = $this->fetch('shared/user_amounts.html.twig', [
-            'amounts_array' => $amountArray
-        ]);
-
         return $this->json([
             'ok' => true,
-            'amountsHtml' => $amountsHtml
+            'amountsHtml' => $this->userAmountFragmentsService->buildAmountForUser($data['user_id'])
         ]);
     }
 }
