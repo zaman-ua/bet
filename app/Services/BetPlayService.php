@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Core\Interface\DbInterface;
 use App\DTO\UserAmountLogCreateDTO;
 use App\Enums\BetStatusEnum;
-use App\Interface\BetRepositoryInterface;
+use App\Interface\BetWriterRepositoryInterface;
 use App\Interface\UserAccountLogRepositoryInterface;
 use App\Interface\UserAmountRepositoryInterface;
 use RuntimeException;
@@ -15,7 +15,7 @@ final class BetPlayService
 {
     public function __construct(
         protected UserAmountRepositoryInterface     $amounts,
-        protected BetRepositoryInterface            $bets,
+        protected BetWriterRepositoryInterface      $betWriterRepository,
         protected UserAccountLogRepositoryInterface $userAccountLogs,
         private readonly DbInterface                $db,
     ) {}
@@ -26,7 +26,7 @@ final class BetPlayService
             $this->db->begin();
 
             // достаем ставку с блокировкой на уровне базы для его изменения
-            $bet = $this->bets->lockGet($betId);
+            $bet = $this->betWriterRepository->lockGet($betId);
             if (!$bet) {
                 throw new RuntimeException('bet not found');
             }
@@ -40,7 +40,7 @@ final class BetPlayService
 
             // ставка проиграна, изменений баланса нет
             if($betPlayEnum === BetStatusEnum::Lost) {
-                $this->bets->markLost($betId);
+                $this->betWriterRepository->markLost($betId);
                 $payout = 0;
             }
 
@@ -55,7 +55,7 @@ final class BetPlayService
                 $this->amounts->credit((int)$bet['user_id'], $bet['currency_id'], $payout);
 
                 // отмечаем ставку выигранной и выплату
-                $this->bets->markWon($betId, $payout);
+                $this->betWriterRepository->markWon($betId, $payout);
             }
 
             // лог движения

@@ -5,7 +5,7 @@ namespace App\Interface;
 use App\DTO\BetCreateDTO;
 use App\DTO\BetViewDTO;
 
-interface BetRepositoryInterface
+interface BetWriterRepositoryInterface
 {
     public function createBet(BetCreateDTO $dto): int;
 
@@ -14,11 +14,5 @@ interface BetRepositoryInterface
     public function markLost(int $betId): void;
 
     public function markWon(int $betId, int $payout): void;
-
-    public function fetchAll() : array;
-
-    public function fetchBetsByUserId(int $userId) : array;
-
-    public function getById(int $betId) : ?BetViewDTO;
 
 }

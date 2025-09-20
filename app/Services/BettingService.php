@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Core\Interface\DbInterface;
 use App\DTO\BetCreateDTO;
 use App\DTO\UserAmountLogCreateDTO;
-use App\Interface\BetRepositoryInterface;
+use App\Interface\BetWriterRepositoryInterface;
 use App\Interface\UserAccountLogRepositoryInterface;
 use App\Interface\UserAmountRepositoryInterface;
 use RuntimeException;
@@ -15,9 +15,9 @@ final class BettingService
 {
     public function __construct(
         private readonly UserAmountRepositoryInterface     $amounts,
-        private readonly BetRepositoryInterface            $bets,
+        private readonly BetWriterRepositoryInterface      $betWriterRepository,
         private readonly UserAccountLogRepositoryInterface $userAccountLogs,
-        private readonly DbInterface $db,
+        private readonly DbInterface                       $db,
     ) {}
 
     public function place(BetCreateDTO $dto): int
@@ -40,7 +40,7 @@ final class BettingService
             $this->amounts->debit($dto->userId, $dto->currencyId, $dto->stake);
 
             // создание ставки
-            $betId = $this->bets->createBet($dto);
+            $betId = $this->betWriterRepository->createBet($dto);
 
             // лог движения
             $this->userAccountLogs->logBetPlace(new UserAmountLogCreateDTO(

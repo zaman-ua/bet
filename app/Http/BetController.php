@@ -8,7 +8,7 @@ use App\Core\Interface\ResponseInterface;
 use App\Domain\MoneyFactory;
 use App\DTO\BetCreateDTO;
 use App\Enums\OutcomeEnum;
-use App\Interface\BetRepositoryInterface;
+use App\Interface\BetReaderRepositoryInterface;
 use App\Interface\MatchConfigProviderInterface;
 use App\Interface\UserReaderRepositoryInterface;
 use App\Services\BettingService;
@@ -24,7 +24,7 @@ final class BetController extends Controller
         RequestInterface                               $request,
         ResponseInterface                              $response,
         private readonly BettingService                $bettingService,
-        private readonly BetRepositoryInterface        $betRepository,
+        private readonly BetReaderRepositoryInterface  $betReaderRepository,
         private readonly UserReaderRepositoryInterface $userReaderRepository,
         private readonly MoneyFactory                  $moneyFactory,
         AuthServiceInterface                           $authService,
@@ -73,7 +73,7 @@ final class BetController extends Controller
                 'amounts_array' => $amountArray
             ]);
 
-            $bets = $this->betRepository->fetchBetsByUserId($userId);
+            $bets = $this->betReaderRepository->fetchBetsByUserId($userId);
             $matches = $this->matchConfigProvider->getMatches();
             $bets = $this->matchPresentationService->attachMatches($bets, $matches);
 

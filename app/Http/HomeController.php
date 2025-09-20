@@ -5,7 +5,7 @@ namespace App\Http;
 use App\Core\Interface\AuthServiceInterface;
 use App\Core\Interface\RequestInterface;
 use App\Core\Interface\ResponseInterface;
-use App\Interface\BetRepositoryInterface;
+use App\Interface\BetReaderRepositoryInterface;
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\MatchConfigProviderInterface;
 use App\Interface\UserReaderRepositoryInterface;
@@ -20,7 +20,7 @@ final class HomeController extends Controller
         RequestInterface                               $request,
         ResponseInterface                              $response,
         private readonly CurrencyRepositoryInterface   $currencyRepository,
-        private readonly BetRepositoryInterface        $betRepository,
+        private readonly BetReaderRepositoryInterface  $betReaderRepository,
         private readonly UserReaderRepositoryInterface $userReaderRepository,
         AuthServiceInterface                           $authService,
         private readonly MatchConfigProviderInterface  $matchConfigProvider,
@@ -40,7 +40,7 @@ final class HomeController extends Controller
             $userId = $this->authService->getUserId();
             if($userId) {
                 $amounts = $this->userReaderRepository->fetchAmountsById($userId);
-                $bets = $this->betRepository->fetchBetsByUserId($userId);
+                $bets = $this->betReaderRepository->fetchBetsByUserId($userId);
             }
         }
 

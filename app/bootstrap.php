@@ -9,7 +9,8 @@ use App\Core\Interface\AuthServiceInterface;
 use App\Core\Interface\DbInterface;
 use App\Core\Service\AuthService;
 use App\Core\Service\RememberMeService;
-use App\Interface\BetRepositoryInterface;
+use App\Interface\BetReaderRepositoryInterface;
+use App\Interface\BetWriterRepositoryInterface;
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\MatchConfigProviderInterface;
 use App\Interface\UserAccountLogRepositoryInterface;
@@ -17,7 +18,8 @@ use App\Interface\UserAmountRepositoryInterface;
 use App\Interface\UserReaderRepositoryInterface;
 use App\Interface\UserWriterRepositoryInterface;
 use App\Provider\MatchConfigProvider;
-use App\Repository\BetRepository;
+use App\Repository\BetReaderRepository;
+use App\Repository\BetWriterRepository;
 use App\Repository\CurrencyRepository;
 use App\Repository\UserAccountLogRepository;
 use App\Repository\UserAmountRepository;
@@ -64,7 +66,8 @@ $container->set(Db::class, static fn (): Db => new Db(
 $container->set(DbInterface::class, static fn (Container $container): DbInterface => $container->get(Db::class));
 
 // репозитории создаются не напрямую, а через интерфейсы, по этому их нужно добавить
-$container->set(BetRepositoryInterface::class, static fn (Container $container): BetRepositoryInterface => $container->get(BetRepository::class));
+$container->set(BetWriterRepositoryInterface::class, static fn (Container $container): BetWriterRepositoryInterface => $container->get(BetWriterRepository::class));
+$container->set(BetReaderRepositoryInterface::class, static fn (Container $container): BetReaderRepositoryInterface => $container->get(BetReaderRepository::class));
 $container->set(CurrencyRepositoryInterface::class, static fn (Container $container): CurrencyRepositoryInterface => $container->get(CurrencyRepository::class));
 $container->set(UserAccountLogRepositoryInterface::class, static fn (Container $container): UserAccountLogRepositoryInterface => $container->get(UserAccountLogRepository::class));
 $container->set(UserAmountRepositoryInterface::class, static fn (Container $container): UserAmountRepositoryInterface => $container->get(UserAmountRepository::class));

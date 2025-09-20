@@ -7,7 +7,7 @@ use App\Core\Interface\RequestInterface;
 use App\Core\Interface\ResponseInterface;
 use App\Enums\BetStatusEnum;
 use App\Http\Controller;
-use App\Interface\BetRepositoryInterface;
+use App\Interface\BetReaderRepositoryInterface;
 use App\Interface\MatchConfigProviderInterface;
 use App\Services\BetPlayService;
 use App\Services\MatchPresentationService;
@@ -19,13 +19,13 @@ final class BetsController extends Controller
     use WithTwigTrait;
 
     public function __construct(
-        RequestInterface $request,
-        ResponseInterface $response,
-        private readonly BetPlayService $betPlayService,
-        private readonly BetRepositoryInterface $betRepository,
-        AuthServiceInterface $authService,
+        RequestInterface                              $request,
+        ResponseInterface                             $response,
+        private readonly BetPlayService               $betPlayService,
+        private readonly BetReaderRepositoryInterface $betReaderRepository,
+        AuthServiceInterface                          $authService,
         private readonly MatchConfigProviderInterface $matchConfigProvider,
-        private readonly MatchPresentationService $matchPresentationService,
+        private readonly MatchPresentationService     $matchPresentationService,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -37,7 +37,7 @@ final class BetsController extends Controller
             return $this->redirect('/');
         }
 
-        $bets = $this->betRepository->fetchAll();
+        $bets = $this->betReaderRepository->fetchAll();
         $matches = $this->matchConfigProvider->getMatches();
 
         $bets = $this->matchPresentationService->attachMatches($bets, $matches);
@@ -62,7 +62,7 @@ final class BetsController extends Controller
         $betPlayEnum = BetStatusEnum::from($data['result']);
 
         $betId = $this->betPlayService->play($data['bet_id'], $betPlayEnum);
-        $bet = $this->betRepository->getById($betId);
+        $bet = $this->betReaderRepository->getById($betId);
 
         return $this->json([
             'ok' => true,
