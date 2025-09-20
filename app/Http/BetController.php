@@ -12,6 +12,7 @@ use App\Interface\BetRepositoryInterface;
 use App\Interface\MatchConfigProviderInterface;
 use App\Interface\UserRepositoryInterface;
 use App\Services\BettingService;
+use App\Services\MatchPresentationService;
 use App\Traits\WithTwigTrait;
 use App\Validation\CreateBetValidator;
 
@@ -28,6 +29,7 @@ final class BetController extends Controller
         private readonly MoneyFactory $moneyFactory,
         AuthServiceInterface $authService,
         private readonly MatchConfigProviderInterface $matchConfigProvider,
+        private readonly MatchPresentationService $matchPresentationService,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -73,7 +75,7 @@ final class BetController extends Controller
 
             $bets = $this->betRepository->fetchBetsByUserId($userId);
             $matches = $this->matchConfigProvider->getMatches();
-            $bets = $this->betRepository->processMatches($bets ?? [], $matches);
+            $bets = $this->matchPresentationService->attachMatches($bets, $matches);
 
             $betsTable = $this->fetch('shared/user_bets.html.twig', [
                 'bets' => $bets

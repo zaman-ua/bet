@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Core\Interface\DbInterface;
 use App\Domain\MoneyFactory;
 use App\DTO\BetCreateDTO;
+use App\DTO\BetViewDTO;
 use App\Interface\BetRepositoryInterface;
 
 final class BetRepository implements BetRepositoryInterface
@@ -12,8 +13,7 @@ final class BetRepository implements BetRepositoryInterface
     public function __construct(
         private readonly MoneyFactory $moneyFactory,
         private readonly DbInterface $db,
-    ) {
-    }
+    ) {}
 
     public function createBet(BetCreateDTO $dto): int
     {
@@ -53,7 +53,7 @@ final class BetRepository implements BetRepositoryInterface
         ]);
     }
 
-    public function fetchAll() : ?array
+    public function fetchAll() : array
     {
         $all = $this->db->getAll('SELECT 
                 b.id,
@@ -74,20 +74,16 @@ final class BetRepository implements BetRepositoryInterface
             ORDER BY b.id DESC;
         ');
 
-        if(!empty($all)) {
-            foreach ($all as $key => $item) {
-                $all[$key] = $this->processBets($item);
-            }
-
-            return $all;
+        if(empty($all)) {
+            return [];
         }
 
-        return $all;
+        return array_map(fn (array $item): BetViewDTO => $this->hydrateBet($item), $all);
     }
 
     // дублирование кода,
     // но доделываю я на скорую руку, простите
-    public function fetchBetsByUserId(int $userId) : ?array
+    public function fetchBetsByUserId(int $userId) : array
     {
         $all = $this->db->getAll('SELECT 
                 b.id,
@@ -107,18 +103,14 @@ final class BetRepository implements BetRepositoryInterface
             ORDER BY b.id DESC;
         ', ['user_id'=>$userId]);
 
-        if(!empty($all)) {
-            foreach ($all as $key => $item) {
-                $all[$key] = $this->processBets($item);
-            }
-
-            return $all;
+        if (empty($all)) {
+            return [];
         }
 
-        return $all;
+        return array_map(fn (array $item): BetViewDTO => $this->hydrateBet($item), $all);
     }
 
-    public function getById(int $betId) : ?array
+    public function getById(int $betId) : ?BetViewDTO
     {
         $row = $this->db->getRow('SELECT 
                 b.id,
@@ -139,33 +131,31 @@ final class BetRepository implements BetRepositoryInterface
             ORDER BY b.id DESC;
         ', ['betId'=>$betId]);
 
-        if(!empty($row)) {
-            return $this->processBets($row);
+        if (empty($row)) {
+            return null;
         }
 
-        return $row;
+        return $this->hydrateBet($row);
     }
 
-    private function processBets(array $item) : array
+    private function hydrateBet(array $item): BetViewDTO
     {
-       $item['stake'] = $this->moneyFactory->fromRaw($item['stake'], $item['currency_id']);
+        $stake = $this->moneyFactory->fromRaw((int) $item['stake'], (int) $item['currency_id']);
+        $payout = $this->moneyFactory->fromRaw((int) $item['payout'], (int) $item['currency_id']);
 
-       $item['coefficient'] = ($item['coefficient'] / 100);
-       $item['payout'] = ($item['payout'] / 100);
-
-        return $item;
+        return new BetViewDTO(
+            id: (int) $item['id'],
+            user_id: (int) $item['user_id'],
+            created_at: (string) $item['created_at'],
+            user_name: (string) $item['user_name'],
+            match_id: (int) $item['match_id'],
+            outcome: (string) $item['outcome'],
+            stake: $stake,
+            coefficient: ((int) $item['coefficient']) / 100,
+            currency_id: (int) $item['currency_id'],
+            status: (string) $item['status'],
+            payout: $payout,
+        );
     }
 
-    public function processMatches(?array $bets = null, ?array $matches = null) : ?array
-    {
-        if(!empty($bets) && !empty($matches)) {
-            foreach ($bets as $key => $bet) {
-                if(isset($matches[$bet['match_id']])) {
-                    $bets[$key]['match'] = $matches[$bet['match_id']]['win'] . ' - ' . $matches[$bet['match_id']]['loss'];
-                }
-            }
-        }
-
-        return $bets;
-    }
 }

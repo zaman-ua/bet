@@ -9,6 +9,7 @@ use App\Interface\BetRepositoryInterface;
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\MatchConfigProviderInterface;
 use App\Interface\UserRepositoryInterface;
+use App\Services\MatchPresentationService;
 use App\Traits\WithTwigTrait;
 
 final class HomeController extends Controller
@@ -23,6 +24,7 @@ final class HomeController extends Controller
         private readonly UserRepositoryInterface $userRepository,
         AuthServiceInterface $authService,
         private readonly MatchConfigProviderInterface $matchConfigProvider,
+        private readonly MatchPresentationService $matchPresentationService,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -45,7 +47,7 @@ final class HomeController extends Controller
         $currencies = $this->currencyRepository->getAssoc();
         $matches = $this->matchConfigProvider->getMatches();
 
-        $bets = $this->betRepository->processMatches($bets ?? [], $matches);
+        $bets = $this->matchPresentationService->attachMatches($bets ?? [], $matches);
 
         return $this->render('home/index.html.twig', [
             'matches' => $matches,

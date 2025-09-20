@@ -10,6 +10,7 @@ use App\Http\Controller;
 use App\Interface\BetRepositoryInterface;
 use App\Interface\MatchConfigProviderInterface;
 use App\Services\BetPlayService;
+use App\Services\MatchPresentationService;
 use App\Traits\WithTwigTrait;
 use RuntimeException;
 
@@ -24,6 +25,7 @@ final class BetsController extends Controller
         private readonly BetRepositoryInterface $betRepository,
         AuthServiceInterface $authService,
         private readonly MatchConfigProviderInterface $matchConfigProvider,
+        private readonly MatchPresentationService $matchPresentationService,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -38,7 +40,7 @@ final class BetsController extends Controller
         $bets = $this->betRepository->fetchAll();
         $matches = $this->matchConfigProvider->getMatches();
 
-        $bets = $this->betRepository->processMatches($bets, $matches);
+        $bets = $this->matchPresentationService->attachMatches($bets, $matches);
 
         return $this->render('admin/bets.html.twig', [
             'bets' => $bets,
@@ -64,8 +66,8 @@ final class BetsController extends Controller
 
         return $this->json([
             'ok' => true,
-            'statusHtml' => $bet['status'],
-            'payoutHtml' => $bet['payout']
+            'statusHtml' => $bet->status,
+            'payoutHtml' => $bet->payout->toHuman()
         ]);
     }
 }
