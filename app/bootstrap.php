@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-// автозагрузка через composer
+use App\Core\App;
 use App\Core\Interface\AuthServiceInterface;
 
+// автозагрузка через composer
 require __DIR__ . '/../vendor/autoload.php';
 
 // константа для рутовой директории проекта
@@ -42,4 +43,4 @@ $container = require APP_ROOT . '/app/container.php';
 // то что переносили свыше Auth::resumeFromRememberCookie();
 $container->get(AuthServiceInterface::class)->resumeFromRememberCookie();
 
-return $container;
+return $container->get(App::class);

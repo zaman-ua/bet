@@ -1,11 +1,17 @@
 <?php
 
+use App\Core\App;
 use App\Core\Container;
+use App\Core\ControllerInvoker;
+use App\Core\CsrfGuard;
 use App\Core\Db\Db;
 use App\Core\Interface\AuthServiceInterface;
 use App\Core\Interface\DbInterface;
+use App\Core\ResponseEmitter;
+use App\Core\Router;
 use App\Core\Service\AuthService;
 use App\Core\Service\RememberMeService;
+use App\Exception\ErrorHandler;
 use App\Interface\BetReaderRepositoryInterface;
 use App\Interface\BetWriterRepositoryInterface;
 use App\Interface\CurrencyRepositoryInterface;
@@ -56,5 +62,19 @@ $container->set(RememberMeService::class, static fn (): RememberMeService => new
 
 $container->set(AuthServiceInterface::class, static fn (Container $container): AuthServiceInterface => $container->get(AuthService::class));
 
+$container->set(Router::class, static fn (): Router => Router::fromFile(APP_ROOT . '/routes/routes.php'));
+$container->set(CsrfGuard::class, static fn (): CsrfGuard => new CsrfGuard());
+$container->set(ResponseEmitter::class, static fn (): ResponseEmitter => new ResponseEmitter());
+$container->set(ErrorHandler::class, static fn (): ErrorHandler => new ErrorHandler(env('APP_DEBUG', false)));
+$container->set(ControllerInvoker::class, static fn (Container $container): ControllerInvoker => new ControllerInvoker(
+    $container,
+    $container->get(ErrorHandler::class)
+));
+$container->set(App::class, static fn (Container $container): App => new App(
+    $container->get(Router::class),
+    $container->get(CsrfGuard::class),
+    $container->get(ControllerInvoker::class),
+    $container->get(ResponseEmitter::class)
+));
 
 return $container;

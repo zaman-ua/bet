@@ -13,14 +13,21 @@ use RuntimeException;
 
 final class App
 {
-    public function __construct(private ?Router $router = null, private ?Container $container = null)
-    {
-        // инициализация роутера
-        $this->router = $router ?? Router::fromFile(APP_ROOT . '/routes/routes.php');
+//    public function __construct(private ?Router $router = null, private ?Container $container = null)
+//    {
+//        // инициализация роутера
+//        $this->router = $router ?? Router::fromFile(APP_ROOT . '/routes/routes.php');
+//
+//        // инициализация DI-контейнера
+//        $this->container = $this->container ?? new Container();
+//    }
 
-        // инициализация DI-контейнера
-        $this->container = $this->container ?? new Container();
-    }
+    public function __construct(
+        private Router $router,
+        private CsrfGuard $csrfGuard,
+        private ControllerInvoker $controllerInvoker,
+        private ResponseEmitter $responseEmitter,
+    ) {}
 
     public function handle(RequestInterface $request) : void
     {
@@ -34,20 +41,15 @@ final class App
                 ->withStatus(404)
                 ->write('404 Not Found');
 
-            $this->emit($response);
+            $this->responseEmitter->emit($response);
             return;
         }
 
         // проверка csrf для всех POST запросов
-        if($request->getMethod() === 'POST') {
-            if (($request->getPost()['csrf'] ?? '') !== ($_SESSION['csrf'] ?? '')) {
-                $response = $response
-                    ->withHeader('Content-Type', 'text/plain; charset=utf-8')
-                    ->withStatus(419)
-                    ->write('CSRF token mismatch');
-                $this->emit($response);
-                return;
-            }
+        $csrfResponse = $this->csrfGuard->validate($request, $response);
+        if ($csrfResponse !== null) {
+            $this->responseEmitter->emit($csrfResponse);
+            return;
         }
 
         [$handler, $vars] = $match;
@@ -59,86 +61,7 @@ final class App
             }
         }
 
-        // оборачиваем вызов контроллеров проверкой на исключения
-        try {
-            // вызов контроллера
-            if (is_string($handler)) {
-                // для инвокабл контроллера
-                $response = $this->resolveController($handler, $request, $response)();
-
-            } elseif (is_array($handler)) {
-                // для конкретного метода контроллера
-                [$class, $method] = [$handler[0], $handler[1]];
-                $controller = $this->resolveController($class, $request, $response);
-                $response = $controller->{$method}();
-
-            }
-        } catch (\Throwable $e) {
-            // кастомный обработчик исключений,
-            // что бы красиво вывести для api и браузерных запросов
-            $errorHandler = new ErrorHandler(env('APP_DEBUG', false));
-            $response = $errorHandler->render($e, $request, $response);
-        }
-
-        // обработка респонса
-        $this->emit($response);
-    }
-
-    private function resolveController(string $class, RequestInterface $request, ResponseInterface $response): Controller
-    {
-        $reflection = new ReflectionClass($class);
-        $constructor = $reflection->getConstructor();
-
-        if ($constructor === null) {
-            /** @var Controller $controller */
-            $controller = $reflection->newInstance($request, $response);
-
-            return $controller;
-        }
-
-        $parameters = $constructor->getParameters();
-
-        if (count($parameters) < 2) {
-            throw new RuntimeException("Controller '{$class}' must accept Request and Response as the first arguments");
-        }
-
-        $arguments = [$request, $response];
-
-        foreach (array_slice($parameters, 2) as $parameter) {
-            $type = $parameter->getType();
-
-            if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
-                $arguments[] = $this->container->get($type->getName());
-
-                continue;
-            }
-
-            if ($parameter->isDefaultValueAvailable()) {
-                $arguments[] = $parameter->getDefaultValue();
-
-                continue;
-            }
-
-            throw new RuntimeException("Cannot resolve dependency '{$parameter->getName()}' for controller '{$class}'");
-        }
-
-        /** @var Controller $controller */
-        $controller = $reflection->newInstanceArgs($arguments);
-
-        return $controller;
-    }
-
-    private function emit(ResponseInterface $response): void
-    {
-        // устанавливаем правильный код ответа
-        http_response_code($response->status());
-
-        // устанавливаем заголовки
-        foreach ($response->headers() as $name => $value) {
-            header("$name: $value", true);
-        }
-
-        // отображаем контент
-        echo $response->body();
+        $response = $this->controllerInvoker->invoke($handler, $request, $response);
+        $this->responseEmitter->emit($response);
     }
 }
