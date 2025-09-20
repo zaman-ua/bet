@@ -15,7 +15,7 @@ return function (Router $route): void {
 
     // регистация
     $route->add('GET', '/users/registration', [RegistrationController::class, 'index']);
-    $route->add('POST', '/users/registration', [RegistrationController::class, 'register']);
+    $route->add('POST', '/users/registration', [RegistrationController::class, 'store']);
 
     // вход
     $route->add('GET', '/users/login', [LoginController::class, 'index']);

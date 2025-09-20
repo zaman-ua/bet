@@ -17,7 +17,8 @@ class RegistrationController extends Controller
     use WithRequestValidateTrait;
 
     public function __construct(
-        RequestInterface $request, ResponseInterface $response,
+        RequestInterface $request,
+        ResponseInterface $response,
         private readonly UserRepositoryInterface $userRepository,
         AuthServiceInterface $authService,
     ) {
@@ -28,7 +29,7 @@ class RegistrationController extends Controller
         return $this->render('user/registration.html.twig');
     }
 
-    public function register() : ResponseInterface
+    public function store() : ResponseInterface
     {
         // общая валидация
         $validated = $this->validate($this->request->getPost()['data'], [

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Core\Interface\DbInterface;
 use App\DTO\UserAmountLogCreateDTO;
+use App\Enums\BetStatusEnum;
 use App\Interface\BetRepositoryInterface;
 use App\Interface\UserAccountLogRepositoryInterface;
 use App\Interface\UserAmountRepositoryInterface;
@@ -16,18 +17,13 @@ final class BetPlayService
         protected UserAmountRepositoryInterface     $amounts,
         protected BetRepositoryInterface            $bets,
         protected UserAccountLogRepositoryInterface $userAccountLogs,
-        private readonly DbInterface $db,
+        private readonly DbInterface                $db,
     ) {}
 
-    public function play(int $betId, string $result): int
+    public function play(int $betId, BetStatusEnum $betPlayEnum): int
     {
         try {
             $this->db->begin();
-
-            // проверяем существование переданного статуса
-            if(!in_array($result, ['won','lost'])) {
-                throw new RuntimeException('wrong result');
-            }
 
             // достаем ставку с блокировкой на уровне базы для его изменения
             $bet = $this->bets->lockGet($betId);
@@ -36,18 +32,20 @@ final class BetPlayService
             }
 
             // проверяем играла ставка или нет
-            if($bet['status'] !== 'placed') {
+            // с Enum стало как то странно
+            // наверное нужно разбить статус в базе на два поля: играла/нет, выиграла/проиграла
+            if(BetStatusEnum::from($bet['status']) !== BetStatusEnum::Placed) {
                 throw new RuntimeException('bet is not placed');
             }
 
             // ставка проиграна, изменений баланса нет
-            if($result === 'lost') {
+            if($betPlayEnum === BetStatusEnum::Lost) {
                 $this->bets->markLost($betId);
                 $payout = 0;
             }
 
             // ставка выиграна
-            if($result === 'won') {
+            if($betPlayEnum === BetStatusEnum::Won) {
                 // считаем выплату
                 $stake  = (int)$bet['stake'];
                 $coefficient  = (int)$bet['coefficient'] / 100;
@@ -66,7 +64,7 @@ final class BetPlayService
                 currencyId: $bet['currency_id'],
                 amount: $payout,
                 betId: $betId,
-                comment: 'Ставка ' . $result
+                comment: 'Ставка ' . $betPlayEnum->value
             ));
 
             $this->db->commit();

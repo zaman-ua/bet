@@ -5,6 +5,7 @@ namespace App\Http\Admin;
 use App\Core\Interface\AuthServiceInterface;
 use App\Core\Interface\RequestInterface;
 use App\Core\Interface\ResponseInterface;
+use App\Enums\BetStatusEnum;
 use App\Http\Controller;
 use App\Interface\BetRepositoryInterface;
 use App\Services\BetPlayService;
@@ -50,11 +51,13 @@ final class BetsController extends Controller
         // TODO
 
 
-        if(empty($data['bet_id']) || !in_array($data['result'], ['won','lost'])) {
+        if(empty($data['bet_id']) || !BetStatusEnum::isValid($data['result'])) {
             throw new RuntimeException('wrong result');
         }
 
-        $betId = $this->betPlayService->play($data['bet_id'], $data['result']);
+        $betPlayEnum = BetStatusEnum::from($data['result']);
+
+        $betId = $this->betPlayService->play($data['bet_id'], $betPlayEnum);
         $bet = $this->betRepository->getById($betId);
 
         return $this->json([
