@@ -25,6 +25,9 @@ date_default_timezone_set(env('APP_TZ', 'UTC'));
 // но само подключение произойдет по месту использования
 $databaseConfig = require APP_ROOT . '/config/database.php';
 
+// регистрация валидаторов
+require APP_ROOT . '/app/validator.php';
+
 // не хороший тон стартовать сессию в каждом инстансе приложения
 // выносим в абстрактный контроллер для http запросов, а для api сессия не нужна
 // возможно позже сделаю лучше
