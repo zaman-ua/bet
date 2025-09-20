@@ -6,11 +6,9 @@ use App\Core\Interface\AuthServiceInterface;
 use App\Core\Interface\RequestInterface;
 use App\Core\Interface\ResponseInterface;
 use App\Enums\BetStatusEnum;
+use App\Facade\BetMatchFacade;
 use App\Http\Controller;
-use App\Interface\BetReaderRepositoryInterface;
-use App\Interface\MatchConfigProviderInterface;
 use App\Services\BetPlayService;
-use App\Services\MatchPresentationService;
 use App\Traits\WithTwigRenderTrait;
 use RuntimeException;
 
@@ -22,10 +20,8 @@ final class BetsController extends Controller
         RequestInterface                              $request,
         ResponseInterface                             $response,
         private readonly BetPlayService               $betPlayService,
-        private readonly BetReaderRepositoryInterface $betReaderRepository,
         AuthServiceInterface                          $authService,
-        private readonly MatchConfigProviderInterface $matchConfigProvider,
-        private readonly MatchPresentationService     $matchPresentationService,
+        private readonly BetMatchFacade               $betMatchFacade
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -37,10 +33,7 @@ final class BetsController extends Controller
             return $this->redirect('/');
         }
 
-        $bets = $this->betReaderRepository->fetchAll();
-        $matches = $this->matchConfigProvider->getMatches();
-
-        $bets = $this->matchPresentationService->attachMatches($bets, $matches);
+        $bets = $this->betMatchFacade->getAllBetsWithMatches();
 
         return $this->render('admin/bets.html.twig', [
             'bets' => $bets,
@@ -62,7 +55,7 @@ final class BetsController extends Controller
         $betPlayEnum = BetStatusEnum::from($data['result']);
 
         $betId = $this->betPlayService->play($data['bet_id'], $betPlayEnum);
-        $bet = $this->betReaderRepository->getById($betId);
+        $bet = $this->betMatchFacade->getBetById($betId);
 
         return $this->json([
             'ok' => true,

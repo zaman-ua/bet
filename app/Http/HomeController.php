@@ -5,11 +5,9 @@ namespace App\Http;
 use App\Core\Interface\AuthServiceInterface;
 use App\Core\Interface\RequestInterface;
 use App\Core\Interface\ResponseInterface;
-use App\Interface\BetReaderRepositoryInterface;
+use App\Facade\BetMatchFacade;
 use App\Interface\CurrencyRepositoryInterface;
-use App\Interface\MatchConfigProviderInterface;
 use App\Interface\UserReaderRepositoryInterface;
-use App\Services\MatchPresentationService;
 use App\Traits\WithTwigRenderTrait;
 
 final class HomeController extends Controller
@@ -20,11 +18,9 @@ final class HomeController extends Controller
         RequestInterface                               $request,
         ResponseInterface                              $response,
         private readonly CurrencyRepositoryInterface   $currencyRepository,
-        private readonly BetReaderRepositoryInterface  $betReaderRepository,
         private readonly UserReaderRepositoryInterface $userReaderRepository,
         AuthServiceInterface                           $authService,
-        private readonly MatchConfigProviderInterface  $matchConfigProvider,
-        private readonly MatchPresentationService      $matchPresentationService,
+        private readonly BetMatchFacade                $betMatchFacade
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -40,14 +36,12 @@ final class HomeController extends Controller
             $userId = $this->authService->getUserId();
             if($userId) {
                 $amounts = $this->userReaderRepository->fetchAmountsById($userId);
-                $bets = $this->betReaderRepository->fetchBetsByUserId($userId);
+                $bets = $this->betMatchFacade->getBetsWithMatchesForUser($userId);
             }
         }
 
         $currencies = $this->currencyRepository->getAssoc();
-        $matches = $this->matchConfigProvider->getMatches();
-
-        $bets = $this->matchPresentationService->attachMatches($bets ?? [], $matches);
+        $matches = $this->betMatchFacade->getMatches();
 
         return $this->render('home/index.html.twig', [
             'matches' => $matches,
