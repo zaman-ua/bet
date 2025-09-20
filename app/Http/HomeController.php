@@ -6,8 +6,7 @@ use App\Core\Interface\AuthServiceInterface;
 use App\Core\Interface\RequestInterface;
 use App\Core\Interface\ResponseInterface;
 use App\Facade\BetMatchFacade;
-use App\Interface\CurrencyRepositoryInterface;
-use App\Interface\UserReaderRepositoryInterface;
+use App\Facade\UserCurrencyFacade;
 use App\Traits\WithTwigRenderTrait;
 
 final class HomeController extends Controller
@@ -17,10 +16,9 @@ final class HomeController extends Controller
     public function __construct(
         RequestInterface                               $request,
         ResponseInterface                              $response,
-        private readonly CurrencyRepositoryInterface   $currencyRepository,
-        private readonly UserReaderRepositoryInterface $userReaderRepository,
         AuthServiceInterface                           $authService,
-        private readonly BetMatchFacade                $betMatchFacade
+        private readonly BetMatchFacade                $betMatchFacade,
+        private readonly UserCurrencyFacade            $userCurrencyFacade,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -35,12 +33,12 @@ final class HomeController extends Controller
         if($this->authService->isLoggedIn()) {
             $userId = $this->authService->getUserId();
             if($userId) {
-                $amounts = $this->userReaderRepository->fetchAmountsById($userId);
+                $amounts = $this->userCurrencyFacade->fetchUserAmountsById($userId);
                 $bets = $this->betMatchFacade->getBetsWithMatchesForUser($userId);
             }
         }
 
-        $currencies = $this->currencyRepository->getAssoc();
+        $currencies = $this->userCurrencyFacade->getCurrencyAssoc();
         $matches = $this->betMatchFacade->getMatches();
 
         return $this->render('home/index.html.twig', [

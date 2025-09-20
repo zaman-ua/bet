@@ -19,8 +19,8 @@ final class BetsController extends Controller
     public function __construct(
         RequestInterface                              $request,
         ResponseInterface                             $response,
-        private readonly BetPlayService               $betPlayService,
         AuthServiceInterface                          $authService,
+        private readonly BetPlayService               $betPlayService,
         private readonly BetMatchFacade               $betMatchFacade
     ) {
         parent::__construct($request, $response, $authService);

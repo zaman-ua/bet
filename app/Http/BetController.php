@@ -18,9 +18,9 @@ final class BetController extends Controller
     public function __construct(
         RequestInterface                               $request,
         ResponseInterface                              $response,
+        AuthServiceInterface                           $authService,
         private readonly BettingService                $bettingService,
         private readonly MoneyFactory                  $moneyFactory,
-        AuthServiceInterface                           $authService,
         private readonly MatchConfigProviderInterface  $matchConfigProvider,
         private readonly UserAmountFragmentsService    $userAmountFragmentsService,
     ) {

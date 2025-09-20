@@ -16,8 +16,8 @@ final class AmountLogsController extends Controller
     public function __construct(
         RequestInterface $request,
         ResponseInterface $response,
-        private readonly UserAccountLogRepositoryInterface $userAccountLogRepository,
         AuthServiceInterface $authService,
+        private readonly UserAccountLogRepositoryInterface $userAccountLogRepository,
     ) {
         parent::__construct($request, $response, $authService);
     }

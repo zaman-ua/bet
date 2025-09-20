@@ -6,10 +6,9 @@ use App\Core\Interface\AuthServiceInterface;
 use App\Core\Interface\RequestInterface;
 use App\Core\Interface\ResponseInterface;
 use App\Domain\MoneyFactory;
+use App\Facade\UserCurrencyFacade;
 use App\FragmentsService\UserAmountFragmentsService;
 use App\Http\Controller;
-use App\Interface\CurrencyRepositoryInterface;
-use App\Interface\UserReaderRepositoryInterface;
 use App\Services\AmountService;
 use App\Traits\WithTwigRenderTrait;
 
@@ -20,12 +19,11 @@ final class UsersController extends Controller
     public function __construct(
         RequestInterface                               $request,
         ResponseInterface                              $response,
-        private readonly AmountService                 $amountService,
-        private readonly CurrencyRepositoryInterface   $currencyRepository,
-        private readonly UserReaderRepositoryInterface $userReaderRepository,
-        private readonly MoneyFactory                  $moneyFactory,
         AuthServiceInterface                           $authService,
+        private readonly AmountService                 $amountService,
+        private readonly MoneyFactory                  $moneyFactory,
         private readonly UserAmountFragmentsService    $userAmountFragmentsService,
+        private readonly UserCurrencyFacade            $userCurrencyFacade,
     ) {
         parent::__construct($request, $response, $authService);
     }
@@ -37,8 +35,8 @@ final class UsersController extends Controller
             return $this->redirect('/');
         }
 
-        $users = $this->userReaderRepository->fetchAll();
-        $currencies = $this->currencyRepository->getAssoc();
+        $users = $this->userCurrencyFacade->fetchAllUsers();
+        $currencies = $this->userCurrencyFacade->getCurrencyAssoc();
 
         return $this->render('admin/users.html.twig', [
             'users' => $users,

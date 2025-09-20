@@ -20,9 +20,9 @@ class RegistrationController extends Controller
     public function __construct(
         RequestInterface                               $request,
         ResponseInterface                              $response,
+        AuthServiceInterface                           $authService,
         private readonly UserReaderRepositoryInterface $userReaderRepository,
         private readonly UserWriterRepositoryInterface $userWriterRepository,
-        AuthServiceInterface                           $authService,
     ) {
         parent::__construct($request, $response, $authService);
     }
