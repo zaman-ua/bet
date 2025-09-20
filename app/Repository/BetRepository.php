@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Core\Db\Db;
+use App\Core\Interface\DbInterface;
 use App\Domain\MoneyFactory;
 use App\DTO\BetCreateDTO;
 use App\Interface\BetRepositoryInterface;
@@ -11,12 +11,13 @@ final class BetRepository implements BetRepositoryInterface
 {
     public function __construct(
         private readonly MoneyFactory $moneyFactory,
+        private readonly DbInterface $db,
     ) {
     }
 
     public function createBet(BetCreateDTO $dto): int
     {
-        Db::execute(
+        $this->db->execute(
             "INSERT INTO bets (user_id, currency_id, match_id, outcome, stake, coefficient, status)
              VALUES (?, ?, ?, ?, ?, ?, 'placed')",
             [
@@ -28,22 +29,22 @@ final class BetRepository implements BetRepositoryInterface
                 $dto->coefficient
             ]);
 
-        return Db::lastInsertId();
+        return $this->db->lastInsertId();
     }
 
     public function lockGet(int $betId): ?array
     {
-        return Db::getRow('SELECT * FROM bets WHERE id = :id FOR UPDATE', ['id'=>$betId]);
+        return $this->db->getRow('SELECT * FROM bets WHERE id = :id FOR UPDATE', ['id'=>$betId]);
     }
 
     public function markLost(int $betId): void
     {
-        Db::execute("UPDATE bets SET status='lost', updated_at=NOW() WHERE id = :id", ['id'=>$betId]);
+        $this->db->execute("UPDATE bets SET status='lost', updated_at=NOW() WHERE id = :id", ['id'=>$betId]);
     }
 
     public function markWon(int $betId, int $payout): void
     {
-        Db::execute("UPDATE bets SET 
+        $this->db->execute("UPDATE bets SET 
             status='won', 
             payout=:payout
         WHERE id = :id", [
@@ -54,7 +55,7 @@ final class BetRepository implements BetRepositoryInterface
 
     public function fetchAll() : ?array
     {
-        $all = Db::getAll('SELECT 
+        $all = $this->db->getAll('SELECT 
                 b.id,
                 b.user_id,
                 b.created_at,
@@ -88,7 +89,7 @@ final class BetRepository implements BetRepositoryInterface
     // но доделываю я на скорую руку, простите
     public function fetchBetsByUserId(int $userId) : ?array
     {
-        $all = Db::getAll('SELECT 
+        $all = $this->db->getAll('SELECT 
                 b.id,
                 b.user_id,
                 b.created_at,
@@ -119,7 +120,7 @@ final class BetRepository implements BetRepositoryInterface
 
     public function getById(int $betId) : ?array
     {
-        $row = Db::getRow('SELECT 
+        $row = $this->db->getRow('SELECT 
                 b.id,
                 b.user_id,
                 b.created_at,

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Core\Db\Db;
+use App\Core\Interface\DbInterface;
 use App\DTO\UserAmountLogCreateDTO;
 use App\Interface\UserAccountLogRepositoryInterface;
 use App\Interface\UserAmountRepositoryInterface;
@@ -12,7 +12,8 @@ final class AmountService
 {
     public function __construct(
         private UserAmountRepositoryInterface     $amounts,
-        private UserAccountLogRepositoryInterface $userAccountLogs
+        private UserAccountLogRepositoryInterface $userAccountLogs,
+        private readonly DbInterface $db,
     ) {}
 
     public function adjust(int $userId, int $currencyId, int $amount, string $comment = ''): void
@@ -20,7 +21,7 @@ final class AmountService
         if ($amount === 0) return;
 
         try {
-            Db::begin();
+            $this->db->begin();
 
             if ($amount > 0) {
                 $this->amounts->credit($userId, $currencyId, $amount);
@@ -35,12 +36,12 @@ final class AmountService
                 comment: $comment
             ));
 
-            Db::commit();
+            $this->db->commit();
 
         } catch (Throwable $e) {
             // откатываем транзакцию
-            if(Db::inTransaction()) {
-                Db::rollBack();
+            if($this->db->inTransaction()) {
+                $this->db->rollBack();
             }
 
             // пробрасываем исключение далее

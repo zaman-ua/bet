@@ -2,29 +2,28 @@
 
 namespace App\Core\Db;
 
+use App\Core\Interface\DbInterface;
 use App\Core\Interface\DbProviderInterface;
 use App\Exception\ConfigurationException;
+use RuntimeException;
 use Throwable;
 
-// для реализации подключения к базе применим паттерн статического сервиса/фасада подобие синглтона, для удобства использования,
-// а для того что бы показать что умеем подменять зависимости - делаем его универсальным под несколько провайдеров
-// - голый pdo
-// - pdo от cakephp (который уже у нас есть после установки phinx)
-final class Db
-{
-    private static ?array  $config = null;
-    private static ?DbProviderInterface $provider = null;
 
-    public static function configure(array $config): void
+final class Db implements DbInterface
+{
+    private ?DbProviderInterface $provider = null;
+
+    /**
+     * @param array<string, mixed> $config
+     */
+    public function __construct(private readonly array $config)
     {
-        self::$config = $config;
-        self::$provider = null;
     }
 
-    public static function execute(string $sql, ?array $bind = null) : int
+    public function execute(string $sql, ?array $bind = null) : int
     {
         try {
-            return self::provider()->execute($sql, $bind);
+            return $this->provider()->execute($sql, $bind);
         } catch (Throwable $e) {
             if(env('APP_DEBUG') === true) {
                 throw $e;
@@ -33,10 +32,10 @@ final class Db
             }
         }
     }
-    public static function getOne(string $sql, ?array $bind = null): mixed
+    public function getOne(string $sql, ?array $bind = null): mixed
     {
         try {
-            return self::provider()->getOne($sql, $bind);
+            return $this->provider()->getOne($sql, $bind);
         } catch (Throwable $e) {
             if(env('APP_DEBUG') === true) {
                 throw $e;
@@ -45,10 +44,10 @@ final class Db
             }
         }
     }
-    public static function getRow(string $sql, ?array $bind = null): ?array
+    public function getRow(string $sql, ?array $bind = null): ?array
     {
         try {
-            return self::provider()->getRow($sql, $bind);
+            return $this->provider()->getRow($sql, $bind);
         } catch (Throwable $e) {
             if(env('APP_DEBUG') === true) {
                 throw $e;
@@ -57,10 +56,10 @@ final class Db
             }
         }
     }
-    public static function getAll(string $sql, ?array $bind = null): ?array
+    public function getAll(string $sql, ?array $bind = null): ?array
     {
         try {
-            return self::provider()->getAll($sql, $bind);
+            return $this->provider()->getAll($sql, $bind);
         } catch (Throwable $e) {
             if(env('APP_DEBUG') === true) {
                 throw $e;
@@ -69,10 +68,10 @@ final class Db
             }
         }
     }
-    public static function getAssoc(string $sql, ?array $bind = null): ?array
+    public function getAssoc(string $sql, ?array $bind = null): ?array
     {
         try {
-            return self::provider()->getAssoc($sql, $bind);
+            return $this->provider()->getAssoc($sql, $bind);
         } catch (Throwable $e) {
             if(env('APP_DEBUG') === true) {
                 throw $e;
@@ -82,43 +81,67 @@ final class Db
         }
     }
 
-    public static function begin(): void
+    public function begin(): void
     {
-        self::provider()->begin();
+        $this->provider()->begin();
     }
-    public static function commit(): void
+    public function commit(): void
     {
-        self::provider()->commit();
+        $this->provider()->commit();
     }
-    public static function rollBack(): void
+    public function rollBack(): void
     {
-        self::provider()->rollBack();
+        $this->provider()->rollBack();
     }
-    public static function inTransaction(): bool
+    public function inTransaction(): bool
     {
-        return self::provider()->inTransaction();
+        return $this->provider()->inTransaction();
     }
-    public static function lastInsertId(): int
+    public function lastInsertId(): int
     {
-        return self::provider()->lastInsertId();
+        return $this->provider()->lastInsertId();
     }
 
-    private static function provider(): DbProviderInterface
+    private function provider(): DbProviderInterface
     {
-        if (self::$provider instanceof DbProviderInterface) {
-            return self::$provider;
+        if ($this->provider instanceof DbProviderInterface) {
+            return $this->provider;
         }
 
-        $config = self::$config ?? throw new ConfigurationException('Db is not configured');
-
-        // выбор драйвера по конфигу
-        $provider = $config['provider'];
-        $provider = __NAMESPACE__ . '\\' . $provider;
-
-        if (!class_exists($provider)) {
-            throw new \RuntimeException("Provider class not found: {$provider}");
+        if ($this->config === []) {
+            throw new ConfigurationException('Database configuration is empty');
         }
 
-        return self::$provider = new $provider($config);
+        $providerClass = $this->config['provider'] ?? null;
+
+        if (!is_string($providerClass) || $providerClass === '') {
+            throw new ConfigurationException('Database provider is not configured');
+        }
+
+        $providerClass = $this->normalizeProviderClass($providerClass);
+
+        if (!class_exists($providerClass)) {
+            throw new RuntimeException("Provider class not found: {$providerClass}");
+        }
+
+        $provider = new $providerClass($this->config);
+
+        if (!$provider instanceof DbProviderInterface) {
+            throw new RuntimeException("Provider {$providerClass} must implement " . DbProviderInterface::class);
+        }
+
+        return $this->provider = $provider;
+    }
+
+    private function normalizeProviderClass(string $providerClass): string
+    {
+        if (class_exists($providerClass)) {
+            return $providerClass;
+        }
+
+        $providerClass = ltrim($providerClass, '\\');
+        $prefixed = __NAMESPACE__ . '\\' . $providerClass;
+
+        return $prefixed;
     }
 }

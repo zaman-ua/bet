@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 // автозагрузка через composer
 use App\Core\Container;
+use App\Core\Db\Db;
 use App\Core\Interface\AuthServiceInterface;
+use App\Core\Interface\DbInterface;
 use App\Core\Service\AuthService;
 use App\Core\Service\RememberMeService;
-use App\Domain\MoneyFactory;
 use App\Interface\BetRepositoryInterface;
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\UserAccountLogRepositoryInterface;
@@ -18,9 +19,6 @@ use App\Repository\CurrencyRepository;
 use App\Repository\UserAccountLogRepository;
 use App\Repository\UserAmountRepository;
 use App\Repository\UserRepository;
-use App\Services\AmountService;
-use App\Services\BetPlayService;
-use App\Services\BettingService;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -40,7 +38,7 @@ date_default_timezone_set(env('APP_TZ', 'UTC'));
 
 // заполняем настройки подключения к базе,
 // но само подключение произойдет по месту использования
-App\Core\Db\Db::configure(require APP_ROOT . '/config/database.php');
+$databaseConfig = require APP_ROOT . '/config/database.php';
 
 // не хороший тон стартовать сессию в каждом инстансе приложения
 // выносим в абстрактный контроллер для http запросов, а для api сессия не нужна
@@ -53,6 +51,14 @@ session_start();
 $container = new Container();
 
 // в контейнере сделан автовайринг
+
+// записываем вручную что бы передать конфиг
+$container->set(Db::class, static fn (): Db => new Db(
+    $databaseConfig
+));
+// вручную потому что через интерфейс
+$container->set(DbInterface::class, static fn (Container $container): DbInterface => $container->get(Db::class));
+
 // репозитории создаются не напрямую, а через интерфейсы, по этому их нужно добавить
 $container->set(BetRepositoryInterface::class, static fn (Container $container): BetRepositoryInterface => $container->get(BetRepository::class));
 $container->set(CurrencyRepositoryInterface::class, static fn (Container $container): CurrencyRepositoryInterface => $container->get(CurrencyRepository::class));
@@ -60,6 +66,7 @@ $container->set(UserAccountLogRepositoryInterface::class, static fn (Container $
 $container->set(UserAmountRepositoryInterface::class, static fn (Container $container): UserAmountRepositoryInterface => $container->get(UserAmountRepository::class));
 $container->set(UserRepositoryInterface::class, static fn (Container $container): UserRepositoryInterface => $container->get(UserRepository::class));
 
+// записываем вручную что бы передать конфиг
 $container->set(RememberMeService::class, static fn (): RememberMeService => new RememberMeService(
     (string) env('APP_SECRET'),
 ));

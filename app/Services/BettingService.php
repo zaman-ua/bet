@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Core\Db\Db;
+use App\Core\Interface\DbInterface;
 use App\DTO\BetCreateDTO;
 use App\DTO\UserAmountLogCreateDTO;
 use App\Interface\BetRepositoryInterface;
@@ -16,13 +16,14 @@ final class BettingService
     public function __construct(
         private readonly UserAmountRepositoryInterface     $amounts,
         private readonly BetRepositoryInterface            $bets,
-        private readonly UserAccountLogRepositoryInterface $userAccountLogs
+        private readonly UserAccountLogRepositoryInterface $userAccountLogs,
+        private readonly DbInterface $db,
     ) {}
 
     public function place(BetCreateDTO $dto): int
     {
         try {
-            Db::begin();
+            $this->db->begin();
 
             // достаем баланс пользователя с блокировкой на уровне базы для его изменения
             $amount = $this->amounts->lockGet($dto->userId, $dto->currencyId);
@@ -50,13 +51,13 @@ final class BettingService
                 comment: 'Ставка сделана'
             ));
 
-            Db::commit();
+            $this->db->commit();
             return $betId;
 
         } catch (Throwable $e) {
             // откатываем транзакцию
-            if(Db::inTransaction()) {
-                Db::rollBack();
+            if($this->db->inTransaction()) {
+                $this->db->rollBack();
             }
 
             // пробрасываем исключение далее

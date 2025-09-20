@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Core\Db\Db;
+use App\Core\Interface\DbInterface;
 use App\Domain\MoneyFactory;
 use App\DTO\UserAmountLogCreateDTO;
 use App\Interface\UserAccountLogRepositoryInterface;
@@ -11,6 +11,7 @@ final class UserAccountLogRepository implements UserAccountLogRepositoryInterfac
 {
     public function __construct(
         private readonly MoneyFactory $moneyFactory,
+        private readonly DbInterface $db,
     ) {
     }
 
@@ -20,7 +21,7 @@ final class UserAccountLogRepository implements UserAccountLogRepositoryInterfac
 
     public function logBetPlace(UserAmountLogCreateDTO $dto): void
     {
-        Db::execute('INSERT INTO user_amount_logs (user_id, currency_id, bet_id, type, amount, comment)
+        $this->db->execute('INSERT INTO user_amount_logs (user_id, currency_id, bet_id, type, amount, comment)
              VALUES (?, ?, ?, ?, ?, ?)', [
                  $dto->userId,
                  $dto->currencyId,
@@ -33,7 +34,7 @@ final class UserAccountLogRepository implements UserAccountLogRepositoryInterfac
 
     public function logBetWin(UserAmountLogCreateDTO $dto): void
     {
-        Db::execute('INSERT INTO user_amount_logs (user_id, currency_id, bet_id, type, amount, comment)
+        $this->db->execute('INSERT INTO user_amount_logs (user_id, currency_id, bet_id, type, amount, comment)
              VALUES (?, ?, ?, ?, ?, ?)', [
             $dto->userId,
             $dto->currencyId,
@@ -46,7 +47,7 @@ final class UserAccountLogRepository implements UserAccountLogRepositoryInterfac
 
     public function logAdminAdjust(UserAmountLogCreateDTO $dto): void
     {
-        Db::execute('INSERT INTO user_amount_logs (user_id, currency_id, bet_id, type, amount, comment)
+        $this->db->execute('INSERT INTO user_amount_logs (user_id, currency_id, bet_id, type, amount, comment)
              VALUES (?, ?, ?, ?, ?, ?)', [
             $dto->userId,
             $dto->currencyId,
@@ -59,7 +60,7 @@ final class UserAccountLogRepository implements UserAccountLogRepositoryInterfac
 
     public function fetchAll() : ?array
     {
-        $all = Db::getAll('SELECT 
+        $all = $this->db->getAll('SELECT 
                 ual.*,
                 u.name as user_name
             FROM user_amount_logs as ual

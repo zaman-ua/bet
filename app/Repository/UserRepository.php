@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Core\Db\Db;
+use App\Core\Interface\DbInterface;
 use App\Domain\MoneyFactory;
 use App\DTO\UserCreateDTO;
 use App\Interface\UserRepositoryInterface;
@@ -11,6 +11,7 @@ final class UserRepository implements UserRepositoryInterface
 {
     public function __construct(
         private readonly MoneyFactory $moneyFactory,
+        private readonly DbInterface $db,
     ) {
     }
 
@@ -24,12 +25,12 @@ final class UserRepository implements UserRepositoryInterface
             $params['status'] = $status ? 'active' : 'inactive';
         }
 
-        return Db::getRow($sql, $params);
+        return $this->db->getRow($sql, $params);
     }
 
     public function getUserIdPwdByLogin(string $login) : ?array
     {
-        return Db::getRow("SELECT id, password_hash 
+        return $this->db->getRow("SELECT id, password_hash 
             FROM `users` 
             WHERE login = :login AND status = 'active' ", [
                 'login' => $login
@@ -38,12 +39,12 @@ final class UserRepository implements UserRepositoryInterface
 
     public function getUserIdByLogin(string $login) : ?int
     {
-        return Db::getOne('SELECT id FROM `users` WHERE `login` = ?', [$login]);
+        return $this->db->getOne('SELECT id FROM `users` WHERE `login` = ?', [$login]);
     }
 
     public function createUser(UserCreateDTO $dto) : ?int
     {
-        Db::execute("INSERT INTO `users` (`login`, `password_hash`, `name`, `gender`, `birth_date`) VALUES (?, ?, ?, ?, ?)", [
+        $this->db->execute("INSERT INTO `users` (`login`, `password_hash`, `name`, `gender`, `birth_date`) VALUES (?, ?, ?, ?, ?)", [
             $dto->login,
             $dto->password_hash,
             $dto->name,
@@ -52,23 +53,23 @@ final class UserRepository implements UserRepositoryInterface
         ]);
 
         // ид вставленной строки
-        return Db::lastInsertId();
+        return $this->db->lastInsertId();
     }
 
     public function createUserContact(int $userId, string $type, string $value) : ?int
     {
-        Db::execute("INSERT INTO `user_contacts` (`user_id`, `type`, `value`) VALUES (?, ?, ?)", [
+        $this->db->execute("INSERT INTO `user_contacts` (`user_id`, `type`, `value`) VALUES (?, ?, ?)", [
             $userId,
             $type,
             $value,
         ]);
 
-        return Db::lastInsertId();
+        return $this->db->lastInsertId();
     }
 
     public function fetchAll() : ?array
     {
-        $all = Db::getAll("SELECT
+        $all = $this->db->getAll("SELECT
                 u.id, u.created_at, u.login, u.name, u.gender, u.birth_date, u.status, u.is_admin,
                 p.phones, e.emails, a.addresses, am.amounts
             FROM users u
@@ -115,7 +116,7 @@ final class UserRepository implements UserRepositoryInterface
     // странно, а чего ты не в UserAmountRepository ?
     public function fetchAmountsById(int $userId) : array
     {
-        $amountString = Db::getOne("SELECT am.amounts
+        $amountString = $this->db->getOne("SELECT am.amounts
             FROM users u
             LEFT JOIN (
                 SELECT ua.user_id,

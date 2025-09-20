@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Core\Db\Db;
+use App\Core\Interface\DbInterface;
 use App\DTO\UserAmountLogCreateDTO;
 use App\Interface\BetRepositoryInterface;
 use App\Interface\UserAccountLogRepositoryInterface;
@@ -15,13 +15,14 @@ final class BetPlayService
     public function __construct(
         protected UserAmountRepositoryInterface     $amounts,
         protected BetRepositoryInterface            $bets,
-        protected UserAccountLogRepositoryInterface $userAccountLogs
+        protected UserAccountLogRepositoryInterface $userAccountLogs,
+        private readonly DbInterface $db,
     ) {}
 
     public function play(int $betId, string $result): int
     {
         try {
-            Db::begin();
+            $this->db->begin();
 
             // проверяем существование переданного статуса
             if(!in_array($result, ['won','lost'])) {
@@ -68,13 +69,13 @@ final class BetPlayService
                 comment: 'Ставка ' . $result
             ));
 
-            Db::commit();
+            $this->db->commit();
             return $betId;
 
         } catch (Throwable $e) {
             // откатываем транзакцию
-            if(Db::inTransaction()) {
-                Db::rollBack();
+            if($this->db->inTransaction()) {
+                $this->db->rollBack();
             }
 
             // пробрасываем исключение далее
