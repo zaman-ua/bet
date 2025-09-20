@@ -10,11 +10,11 @@ use App\Http\Controller;
 use App\Interface\UserReaderRepositoryInterface;
 use App\Interface\UserWriterRepositoryInterface;
 use App\Traits\WithRequestValidateTrait;
-use App\Traits\WithTwigTrait;
+use App\Traits\WithTwigRenderTrait;
 
 class RegistrationController extends Controller
 {
-    use WithTwigTrait;
+    use WithTwigRenderTrait;
     use WithRequestValidateTrait;
 
     public function __construct(

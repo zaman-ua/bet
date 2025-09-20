@@ -5,11 +5,11 @@ namespace App\Http\User;
 use App\Core\Interface\ResponseInterface;
 use App\Http\Controller;
 use App\Traits\WithRequestValidateTrait;
-use App\Traits\WithTwigTrait;
+use App\Traits\WithTwigRenderTrait;
 
 class LoginController extends Controller
 {
-    use WithTwigTrait;
+    use WithTwigRenderTrait;
     use WithRequestValidateTrait;
 
     public function index() : ResponseInterface

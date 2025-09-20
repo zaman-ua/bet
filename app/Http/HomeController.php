@@ -10,11 +10,11 @@ use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\MatchConfigProviderInterface;
 use App\Interface\UserReaderRepositoryInterface;
 use App\Services\MatchPresentationService;
-use App\Traits\WithTwigTrait;
+use App\Traits\WithTwigRenderTrait;
 
 final class HomeController extends Controller
 {
-    use WithTwigTrait;
+    use WithTwigRenderTrait;
 
     public function __construct(
         RequestInterface                               $request,

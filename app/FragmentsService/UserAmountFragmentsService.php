@@ -6,11 +6,11 @@ use App\Interface\BetReaderRepositoryInterface;
 use App\Interface\MatchConfigProviderInterface;
 use App\Interface\UserReaderRepositoryInterface;
 use App\Services\MatchPresentationService;
-use App\Traits\WithTwigTrait;
+use App\Traits\WithTwigFetchTrait;
 
 final class UserAmountFragmentsService
 {
-    use WithTwigTrait;
+    use WithTwigFetchTrait;
 
     public function __construct(
         private readonly BetReaderRepositoryInterface  $betReaderRepository,

@@ -11,11 +11,11 @@ use App\Http\Controller;
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\UserReaderRepositoryInterface;
 use App\Services\AmountService;
-use App\Traits\WithTwigTrait;
+use App\Traits\WithTwigRenderTrait;
 
 final class UsersController extends Controller
 {
-    use WithTwigTrait;
+    use WithTwigRenderTrait;
 
     public function __construct(
         RequestInterface                               $request,

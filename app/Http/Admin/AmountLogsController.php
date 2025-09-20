@@ -7,11 +7,11 @@ use App\Core\Interface\RequestInterface;
 use App\Core\Interface\ResponseInterface;
 use App\Http\Controller;
 use App\Interface\UserAccountLogRepositoryInterface;
-use App\Traits\WithTwigTrait;
+use App\Traits\WithTwigRenderTrait;
 
 final class AmountLogsController extends Controller
 {
-    use WithTwigTrait;
+    use WithTwigRenderTrait;
 
     public function __construct(
         RequestInterface $request,

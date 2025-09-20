@@ -11,12 +11,12 @@ use App\Interface\BetReaderRepositoryInterface;
 use App\Interface\MatchConfigProviderInterface;
 use App\Services\BetPlayService;
 use App\Services\MatchPresentationService;
-use App\Traits\WithTwigTrait;
+use App\Traits\WithTwigRenderTrait;
 use RuntimeException;
 
 final class BetsController extends Controller
 {
-    use WithTwigTrait;
+    use WithTwigRenderTrait;
 
     public function __construct(
         RequestInterface                              $request,
