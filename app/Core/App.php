@@ -13,15 +13,6 @@ use RuntimeException;
 
 final class App
 {
-//    public function __construct(private ?Router $router = null, private ?Container $container = null)
-//    {
-//        // инициализация роутера
-//        $this->router = $router ?? Router::fromFile(APP_ROOT . '/routes/routes.php');
-//
-//        // инициализация DI-контейнера
-//        $this->container = $this->container ?? new Container();
-//    }
-
     public function __construct(
         private Router $router,
         private CsrfGuard $csrfGuard,
