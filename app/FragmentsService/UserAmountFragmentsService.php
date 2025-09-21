@@ -4,6 +4,7 @@ namespace App\FragmentsService;
 
 use App\Facade\BetMatchFacade;
 use App\Interface\UserReaderRepositoryInterface;
+use App\Services\AmountPresentationService;
 use App\Traits\WithTwigFetchTrait;
 
 final class UserAmountFragmentsService
@@ -12,12 +13,14 @@ final class UserAmountFragmentsService
 
     public function __construct(
         private readonly UserReaderRepositoryInterface $userReaderRepository,
-        private readonly BetMatchFacade                $betMatchFacade
+        private readonly BetMatchFacade                $betMatchFacade,
+        private readonly AmountPresentationService     $amountPresentationService,
     ) {}
 
     public function buildAmountForUser(int $userId): string
     {
-        $amountArray = $this->userReaderRepository->fetchAmountsById($userId);
+        $amount = $this->userReaderRepository->fetchAmountsById($userId);
+        $amountArray = $this->amountPresentationService->fetchAmount($amount);
 
         return $this->fetch('shared/user_amounts.html.twig', [
             'amounts_array' => $amountArray,

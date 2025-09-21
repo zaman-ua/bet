@@ -4,12 +4,14 @@ namespace App\Facade;
 
 use App\Interface\CurrencyRepositoryInterface;
 use App\Interface\UserReaderRepositoryInterface;
+use App\Services\AmountPresentationService;
 
 final class UserCurrencyFacade
 {
     public function __construct(
         private readonly CurrencyRepositoryInterface   $currencyRepository,
         private readonly UserReaderRepositoryInterface $userReaderRepository,
+        private readonly AmountPresentationService     $amountPresentationService,
     ) {}
 
     public function getCurrencyAssoc() : ?array
@@ -19,11 +21,13 @@ final class UserCurrencyFacade
 
     public function fetchAllUsers() : ?array
     {
-        return $this->userReaderRepository->fetchAll();
+        $users = $this->userReaderRepository->fetchAll();
+        return $this->amountPresentationService->fetchAmounts($users);
     }
 
     public function fetchUserAmountsById(int $userId) : array
     {
-        return $this->userReaderRepository->fetchAmountsById($userId);
+        $amount = $this->userReaderRepository->fetchAmountsById($userId);
+        return $this->amountPresentationService->fetchAmount($amount);
     }
 }

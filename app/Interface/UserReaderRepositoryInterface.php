@@ -12,5 +12,5 @@ interface UserReaderRepositoryInterface
 
     public function fetchAll(): ?array;
 
-    public function fetchAmountsById(int $userId): array;
+    public function fetchAmountsById(int $userId): ?string;
 }

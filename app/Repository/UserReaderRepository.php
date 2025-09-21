@@ -3,13 +3,11 @@
 namespace App\Repository;
 
 use App\Core\Interface\DbInterface;
-use App\Domain\MoneyFactory;
 use App\Interface\UserReaderRepositoryInterface;
 
 final class UserReaderRepository implements UserReaderRepositoryInterface
 {
     public function __construct(
-        private readonly MoneyFactory $moneyFactory,
         private readonly DbInterface $db,
     ) {
     }
@@ -65,33 +63,27 @@ final class UserReaderRepository implements UserReaderRepositoryInterface
                 WHERE type = 'address'
                 GROUP BY user_id
             ) a ON a.user_id = u.id
-            LEFT JOIN (
-                SELECT ua.user_id,
-                GROUP_CONCAT(DISTINCT CONCAT(ua.amount, ' ', c.symbol) ORDER BY c.symbol SEPARATOR ';') AS amounts
-                FROM user_amounts ua
-                JOIN currencies c ON c.id = ua.currency_id
-                GROUP BY ua.user_id
-            ) am ON am.user_id = u.id
+            {$this->userAmountSqlFragment()}
             ORDER BY u.id DESC;
         ");
-
-        if(!empty($all)) {
-            foreach ($all as $key => $user) {
-                if(!empty($user['amounts'])) {
-                    $amountsArray = explode(';', $user['amounts']);
-                    $all[$key]['amounts_array'] = $this->processAmounts($amountsArray);
-                }
-            }
-        }
 
         return $all;
     }
 
     // странно, а чего ты не в UserAmountRepository ?
-    public function fetchAmountsById(int $userId) : array
+    public function fetchAmountsById(int $userId) : ?string
     {
         $amountString = $this->db->getOne("SELECT am.amounts
             FROM users u
+            {$this->userAmountSqlFragment()}
+            WHERE u.id = :userId", [$userId]);
+
+        return $amountString;
+    }
+
+    private function userAmountSqlFragment() : string
+    {
+        return "
             LEFT JOIN (
                 SELECT ua.user_id,
                 GROUP_CONCAT(DISTINCT CONCAT(ua.amount, ' ', c.symbol) ORDER BY c.symbol SEPARATOR ';') AS amounts
@@ -99,29 +91,6 @@ final class UserReaderRepository implements UserReaderRepositoryInterface
                 JOIN currencies c ON c.id = ua.currency_id
                 GROUP BY ua.user_id
             ) am ON am.user_id = u.id
-            WHERE u.id = :userId", [$userId]);
-
-        if(!empty($amountString)) {
-            $amountsArray = explode(';', $amountString);
-            return $this->processAmounts($amountsArray);
-        }
-
-        return [];
-    }
-
-    private function processAmounts(array $amounts) : array
-    {
-        $result = [];
-
-        if(!empty($amounts)) {
-            foreach ($amounts as $amount) {
-                [$amountRaw, $currencyCode] = explode(' ', $amount);
-                $money = $this->moneyFactory->fromRaw($amountRaw, null, $currencyCode);
-
-                $result[] = $money;
-            }
-        }
-
-        return $result;
+        ";
     }
 }
