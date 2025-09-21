@@ -16,22 +16,8 @@ final class BetReaderRepository implements BetReaderRepositoryInterface
 
     public function fetchAll() : array
     {
-        $all = $this->db->getAll('SELECT 
-                b.id,
-                b.user_id,
-                b.created_at,
-                u.name as user_name,
-                /*c.code,*/
-                b.match_id,
-                b.outcome,
-                b.stake,
-                b.coefficient,
-                b.currency_id,
-                b.status,
-                b.payout
-            FROM bets as b
-            INNER JOIN users as u ON b.user_id = u.id
-            /*INNER JOIN currencies as c ON b.currency_id = c.id*/
+        $all = $this->db->getAll(
+        $this->betSqlFragment() . '
             ORDER BY b.id DESC;
         ');
 
@@ -46,20 +32,8 @@ final class BetReaderRepository implements BetReaderRepositoryInterface
     // но доделываю я на скорую руку, простите
     public function fetchBetsByUserId(int $userId) : array
     {
-        $all = $this->db->getAll('SELECT 
-                b.id,
-                b.user_id,
-                b.created_at,
-                u.name as user_name,
-                b.match_id,
-                b.outcome,
-                b.stake,
-                b.coefficient,
-                b.currency_id,
-                b.status,
-                b.payout
-            FROM bets as b
-            INNER JOIN users as u ON b.user_id = u.id
+        $all = $this->db->getAll(
+        $this->betSqlFragment() . '
             WHERE b.user_id = :user_id
             ORDER BY b.id DESC;
         ', ['user_id'=>$userId]);
@@ -73,23 +47,10 @@ final class BetReaderRepository implements BetReaderRepositoryInterface
 
     public function getById(int $betId) : ?BetViewDTO
     {
-        $row = $this->db->getRow('SELECT 
-                b.id,
-                b.user_id,
-                b.created_at,
-                u.name as user_name,
-                /*c.code,*/
-                b.match_id,
-                b.outcome,
-                b.stake,
-                b.coefficient,
-                b.currency_id,
-                b.status,
-                b.payout
-            FROM bets as b
-            INNER JOIN users as u ON b.user_id = u.id
-            WHERE b.id = :betId
-            ORDER BY b.id DESC;
+        $row = $this->db->getRow(
+            $this->betSqlFragment() . '
+                WHERE b.id = :betId
+                ORDER BY b.id DESC;
         ', ['betId'=>$betId]);
 
         if (empty($row)) {
@@ -119,4 +80,21 @@ final class BetReaderRepository implements BetReaderRepositoryInterface
         );
     }
 
+    private function betSqlFragment() : string
+    {
+        return "SELECT 
+                b.id,
+                b.user_id,
+                b.created_at,
+                u.name as user_name,
+                b.match_id,
+                b.outcome,
+                b.stake,
+                b.coefficient,
+                b.currency_id,
+                b.status,
+                b.payout
+            FROM bets as b
+            INNER JOIN users as u ON b.user_id = u.id";
+    }
 }
