@@ -28,8 +28,6 @@ final class BetReaderRepository implements BetReaderRepositoryInterface
         return array_map(fn (array $item): BetViewDTO => $this->hydrateBet($item), $all);
     }
 
-    // дублирование кода,
-    // но доделываю я на скорую руку, простите
     public function fetchBetsByUserId(int $userId) : array
     {
         $all = $this->db->getAll(
