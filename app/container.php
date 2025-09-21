@@ -11,6 +11,7 @@ use App\Core\ResponseEmitter;
 use App\Core\Router;
 use App\Core\Service\AuthService;
 use App\Core\Service\RememberMeService;
+use App\Enums\BetStatusEnum;
 use App\Exception\ErrorHandler;
 use App\Interface\BetReaderRepositoryInterface;
 use App\Interface\BetWriterRepositoryInterface;
@@ -28,6 +29,9 @@ use App\Repository\UserAccountLogRepository;
 use App\Repository\UserAmountRepository;
 use App\Repository\UserReaderRepository;
 use App\Repository\UserWriterRepository;
+use App\Services\BetPlay\LostBetResultHandler;
+use App\Services\BetPlay\WonBetResultHandler;
+use App\Services\BetPlayService;
 
 // --- Проверим, что конфиг БД передан
 if (!isset($databaseConfig) || !is_array($databaseConfig)) {
@@ -54,6 +58,21 @@ $container->set(UserAmountRepositoryInterface::class, static fn (Container $cont
 $container->set(UserReaderRepositoryInterface::class, static fn (Container $container): UserReaderRepositoryInterface => $container->get(UserReaderRepository::class));
 $container->set(UserWriterRepositoryInterface::class, static fn (Container $container): UserWriterRepositoryInterface => $container->get(UserWriterRepository::class));
 $container->set(MatchConfigProviderInterface::class, static fn (Container $container): MatchConfigProviderInterface => $container->get(MatchConfigProvider::class));
+
+
+$container->set(BetPlayService::class, static function (Container $container): BetPlayService {
+    return new BetPlayService(
+        $container->get(BetWriterRepositoryInterface::class),
+        $container->get(UserAccountLogRepositoryInterface::class),
+        $container->get(DbInterface::class),
+        [
+            // ставка выиграна
+            BetStatusEnum::Won->value => $container->get(WonBetResultHandler::class),
+            // ставка проиграна, изменений баланса нет
+            BetStatusEnum::Lost->value => $container->get(LostBetResultHandler::class),
+        ],
+    );
+});
 
 // записываем вручную что бы передать конфиг
 $container->set(RememberMeService::class, static fn (): RememberMeService => new RememberMeService(

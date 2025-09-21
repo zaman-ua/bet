@@ -8,16 +8,17 @@ use App\Enums\BetStatusEnum;
 use App\Interface\BetWriterRepositoryInterface;
 use App\Interface\UserAccountLogRepositoryInterface;
 use App\Interface\UserAmountRepositoryInterface;
+use App\Services\BetPlay\BetResultHandlerInterface;
 use RuntimeException;
 use Throwable;
 
 final class BetPlayService
 {
     public function __construct(
-        protected UserAmountRepositoryInterface     $amounts,
         protected BetWriterRepositoryInterface      $betWriterRepository,
         protected UserAccountLogRepositoryInterface $userAccountLogs,
         private readonly DbInterface                $db,
+        private readonly array                      $resultHandlers,
     ) {}
 
     public function play(int $betId, BetStatusEnum $betPlayEnum): int
@@ -38,25 +39,13 @@ final class BetPlayService
                 throw new RuntimeException('bet is not placed');
             }
 
-            // ставка проиграна, изменений баланса нет
-            if($betPlayEnum === BetStatusEnum::Lost) {
-                $this->betWriterRepository->markLost($betId);
-                $payout = 0;
+            // вынос логики игры ставки
+            // подключается в контейнере
+            $handler = $this->resultHandlers[$betPlayEnum->value] ?? null;
+            if (!$handler instanceof BetResultHandlerInterface) {
+                throw new RuntimeException(sprintf('handler for status %s not found', $betPlayEnum->value));
             }
-
-            // ставка выиграна
-            if($betPlayEnum === BetStatusEnum::Won) {
-                // считаем выплату
-                $stake  = (int)$bet['stake'];
-                $coefficient  = (int)$bet['coefficient'] / 100;
-                $payout = $stake * $coefficient;
-
-                // вносим в баланс пользователя
-                $this->amounts->credit((int)$bet['user_id'], $bet['currency_id'], $payout);
-
-                // отмечаем ставку выигранной и выплату
-                $this->betWriterRepository->markWon($betId, $payout);
-            }
+            $payout = $handler->handle($betId, $bet);
 
             // лог движения
             $this->userAccountLogs->logBetWin(new UserAmountLogCreateDTO(
